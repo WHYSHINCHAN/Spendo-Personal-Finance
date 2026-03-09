@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accounts - Spendo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .accounts-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .accounts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .account-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background-color: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+        
+        .add-account-card {
+            background-color: var(--bg-tertiary);
+            border: 2px dashed var(--border-color);
+            border-radius: var(--border-radius);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 180px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .add-account-card:hover {
+            border-color: var(--primary-color);
+            background-color: var(--primary-light);
+        }
+        
+        .add-account-card i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .add-account-card p {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .account-transactions {
+            margin-top: 30px;
+        }
+        
+        .account-transactions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .account-transactions-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+        
+        .account-selector {
+            display: flex;
+            align-items: center;
+        }
+        
+        .account-selector label {
+            margin-right: 10px;
+            font-weight: 600;
+        }
+        
+        .account-selector select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-wallet"></i></div>
+                <h1>Spendo</h1>
+            </div>
+            <div class="nav-menu">
+                <a href="/dashboard" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/accounts" class="nav-link active">
+                    <i class="fas fa-landmark"></i>
+                    <span>Accounts</span>
+                </a>
+                <a href="/transactions" class="nav-link">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Transactions</span>
+                </a>
+                <a href="/budget" class="nav-link">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Budget</span>
+                </a>
+                <a href="/goals" class="nav-link">
+                    <i class="fas fa-bullseye"></i>
+                    <span>Goals</span>
+                </a>
+                <a href="/bills" class="nav-link">
+                    <i class="fas fa-file-invoice"></i>
+                    <span>Bills</span>
+                </a>
+                <a href="/education" class="nav-link">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Education</span>
+                </a>
+                <a href="/settings" class="nav-link">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </div>
+            <div class="account-section">
+                <div class="account-info">
+                    <div class="account-avatar">JD</div>
+                    <div class="account-details">
+                        <h4 id="user-name">John Doe</h4>
+                        <div class="account-actions">
+                            <button id="logout-btn" title="Logout">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-left">
+                    <button id="menu-toggle" title="Toggle Menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="greeting">
+                        <h2>My Accounts</h2>
+                        <p>Manage your financial accounts</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button id="theme-toggle" title="Toggle Theme">
+                        <i class="fas fa-moon"></i>
+                        <i class="fas fa-sun" style="display: none;"></i>
+                    </button>
+                    <button id="refresh-btn" class="action-btn" title="Refresh Data">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Refresh</span>
+                    </button>
+                    <button class="action-btn primary" id="add-account-btn" onclick="openModal('add-account-modal')">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Account</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Accounts Content -->
+            <div class="accounts-container">
+                <!-- Account Stats -->
+                <div class="account-stats">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Balance</div>
+                        <div class="stat-value" id="total-balance">₹0.00</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Number of Accounts</div>
+                        <div class="stat-value" id="account-count">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Highest Balance</div>
+                        <div class="stat-value" id="highest-balance">₹0.00</div>
+                    </div>
+                </div>
+
+                <!-- Accounts Grid -->
+                <div class="accounts-grid">
+                    <!-- Accounts will be populated by JavaScript -->
+                    <div class="add-account-card" onclick="openModal('add-account-modal')">
+                        <i class="fas fa-plus-circle"></i>
+                        <p>Add New Account</p>
+                    </div>
+                </div>
+
+                <!-- Account Transactions -->
+                <div class="account-transactions card">
+                    <div class="card-header">
+                        <div class="card-title">Recent Transactions</div>
+                        <div class="account-selector">
+                            <label for="account-filter">Account:</label>
+                            <select id="account-filter" class="account-select">
+                                <option value="">All Accounts</option>
+                                <!-- Options will be populated by JavaScript -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="transaction-list">
+                        <!-- Transactions will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add Account Modal -->
+    <div id="add-account-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Add New Account</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-account-form">
+                    <div class="form-group">
+                        <label for="account-name">Account Name</label>
+                        <input type="text" id="account-name" name="account_name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="account-type">Account Type</label>
+                        <select id="account-type" name="account_type" class="form-control" required>
+                            <option value="CHECKING">Checking</option>
+                            <option value="SAVINGS">Savings</option>
+                            <option value="CREDIT">Credit Card</option>
+                            <option value="INVESTMENT">Investment</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="account-balance">Current Balance</label>
+                        <input type="number" id="account-balance" name="balance" class="form-control" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="account-number">Account Number (Last 4 digits)</label>
+                        <input type="text" id="account-number" name="account_number" class="form-control" maxlength="4" pattern="[0-9]{4}">
+                    </div>
+                    <div class="form-group">
+                        <label for="institution">Institution Name</label>
+                        <input type="text" id="institution" name="institution" class="form-control">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Account</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Account Modal -->
+    <div id="edit-account-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Edit Account</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-account-form">
+                    <div class="form-group">
+                        <label for="edit-account-name">Account Name</label>
+                        <input type="text" id="edit-account-name" name="account_name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-account-type">Account Type</label>
+                        <select id="edit-account-type" name="account_type" class="form-control" required>
+                            <option value="CHECKING">Checking</option>
+                            <option value="SAVINGS">Savings</option>
+                            <option value="CREDIT">Credit Card</option>
+                            <option value="INVESTMENT">Investment</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-account-balance">Current Balance</label>
+                        <input type="number" id="edit-account-balance" name="balance" class="form-control" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-account-number">Account Number (Last 4 digits)</label>
+                        <input type="text" id="edit-account-number" name="account_number" class="form-control" maxlength="4" pattern="[0-9]{4}">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-institution">Institution Name</label>
+                        <input type="text" id="edit-institution" name="institution" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="edit-is-active" name="is_active" checked>
+                            <span>Active</span>
+                        </label>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification-container"></div>
+
+    <!-- Load Main JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initial load
+            loadAccounts();
+            setupAccountForms();
+            setupRefreshButton();
+            
+            // Setup account filter
+            const accountFilter = document.getElementById('account-filter');
+            if (accountFilter) {
+                accountFilter.addEventListener('change', function() {
+                    const accountId = this.value;
+                    loadTransactions(5, accountId);
+                });
+            }
+            
+            // Setup refresh button
+            function setupRefreshButton() {
+                const refreshBtn = document.getElementById('refresh-btn');
+                if (refreshBtn) {
+                    refreshBtn.addEventListener('click', function() {
+                        loadAccounts();
+                        const accountId = document.getElementById('account-filter').value;
+                        loadTransactions(5, accountId);
+                        showNotification('Data refreshed successfully', 'success');
+                    });
+                }
+            }
+            
+            // Update account statistics
+            function updateAccountStats(accounts) {
+                let totalBalance = 0;
+                let highestBalance = 0;
+                
+                accounts.forEach(account => {
+                    const balance = parseFloat(account.balance);
+                    totalBalance += balance;
+                    if (balance > highestBalance) {
+                        highestBalance = balance;
+                    }
+                });
+                
+                document.getElementById('total-balance').textContent = formatCurrency(totalBalance);
+                document.getElementById('account-count').textContent = accounts.length;
+                document.getElementById('highest-balance').textContent = formatCurrency(highestBalance);
+            }
+            
+            // Custom function to load and display accounts
+            async function loadAccounts() {
+                try {
+                    const response = await fetchAPI(API_ENDPOINTS.accounts);
+                    state.accounts = response.accounts;
+                    
+                    // Update account statistics
+                    updateAccountStats(state.accounts);
+                    
+                    // Update UI with accounts
+                    const accountsGridElement = document.querySelector('.accounts-grid');
+                    if (accountsGridElement) {
+                        renderAccountsGrid(accountsGridElement);
+                    }
+                    
+                    // Update account selectors in forms
+                    const accountSelects = document.querySelectorAll('.account-select');
+                    if (accountSelects) {
+                        accountSelects.forEach(select => {
+                            renderAccountOptions(select);
+                        });
+                    }
+                    
+                    return state.accounts;
+                } catch (error) {
+                    console.error('Failed to load accounts:', error);
+                    return [];
+                }
+            }
+            
+            // Render accounts grid
+            function renderAccountsGrid(container) {
+                container.innerHTML = '';
+                
+                state.accounts.forEach(account => {
+                    const accountElement = document.createElement('div');
+                    accountElement.className = 'account-card';
+                    
+                    // Set icon based on account type
+                    let icon = 'credit-card';
+                    if (account.account_type === 'CHECKING') icon = 'wallet';
+                    if (account.account_type === 'SAVINGS') icon = 'piggy-bank';
+                    if (account.account_type === 'INVESTMENT') icon = 'chart-line';
+                    
+                    accountElement.innerHTML = `
+                        <div class="account-type">${account.account_type}</div>
+                        <div class="account-balance">${formatCurrency(account.balance, account.currency)}</div>
+                        <div class="account-name">${account.account_name}</div>
+                        <div class="account-details-row">
+                            <span>${account.institution || 'N/A'}</span>
+                            <span>${account.account_number ? '****' + account.account_number : ''}</span>
+                        </div>
+                        <div class="account-actions">
+                            <button class="account-edit" onclick="openModal('edit-account-modal', ${account.id})"><i class="fas fa-edit"></i></button>
+                            <button class="account-delete" onclick="deleteAccount(${account.id})"><i class="fas fa-trash"></i></button>
+                        </div>
+                    `;
+                    
+                    container.appendChild(accountElement);
+                });
+                
+                // Add the "Add Account" button
+                const addAccountElement = document.createElement('div');
+                addAccountElement.className = 'add-account-card';
+                addAccountElement.setAttribute('onclick', "openModal('add-account-modal')");
+                addAccountElement.innerHTML = `
+                    <i class="fas fa-plus-circle"></i>
+                    <p>Add New Account</p>
+                `;
+                
+                container.appendChild(addAccountElement);
+            }
+            
+            // Load transactions
+            async function loadTransactions(limit = 5, accountId = null) {
+                try {
+                    let url = `${API_ENDPOINTS.transactions}?limit=${limit}`;
+                    if (accountId) {
+                        url += `&account_id=${accountId}`;
+                    }
+                    
+                    const response = await fetchAPI(url);
+                    state.transactions = response.transactions;
+                    
+                    // Update UI with transactions
+                    const transactionListElement = document.querySelector('.transaction-list');
+                    if (transactionListElement) {
+                        renderTransactions(transactionListElement);
+                    }
+                    
+                    return state.transactions;
+                } catch (error) {
+                    console.error('Failed to load transactions:', error);
+                    return [];
+                }
+            }
+        });
+
+        // Setup transaction edit/delete functionality 
+function initializeTransactionHandling() {
+    const editTransactionForm = document.getElementById('edit-transaction-form');
+    
+    if (editTransactionForm) {
+        // Register callback for edit modal
+        window.registerModalCallback = function(modalId, callback) {
+            if (!state.modalCallbacks) {
+                state.modalCallbacks = {};
+            }
+            state.modalCallbacks[modalId] = callback;
+        };
+        
+        registerModalCallback('edit-transaction-modal', async (transactionId) => {
+            try {
+                const response = await fetchAPI(`${API_ENDPOINTS.transactions}/${transactionId}`);
+                const transaction = response.transaction;
+                
+                if (transaction) {
+                    document.getElementById('edit-transaction-type').value = transaction.transaction_type;
+                    document.getElementById('edit-transaction-account').value = transaction.account_id;
+                    document.getElementById('edit-transaction-amount').value = transaction.amount;
+                    document.getElementById('edit-transaction-description').value = transaction.description;
+                    document.getElementById('edit-transaction-date').value = transaction.transaction_date;
+                    document.getElementById('edit-transaction-recurring').checked = transaction.is_recurring === 1;
+                    
+                    if (transaction.notes) {
+                        document.getElementById('edit-transaction-notes').value = transaction.notes;
+                    } else {
+                        document.getElementById('edit-transaction-notes').value = '';
+                    }
+                    
+                    // Handle category selection
+                    const categorySelect = document.getElementById('edit-transaction-category');
+                    renderCategoryOptions(categorySelect, transaction.transaction_type);
+                    
+                    if (transaction.category_id) {
+                        categorySelect.value = transaction.category_id;
+                    }
+                    
+                    // Show/hide transfer fields
+                    const transferFields = document.querySelector('.edit-transfer-fields');
+                    if (transferFields) {
+                        transferFields.style.display = transaction.transaction_type === 'TRANSFER' ? 'block' : 'none';
+                    }
+                    
+                    // Store transaction ID in form data attribute
+                    editTransactionForm.dataset.transactionId = transactionId;
+                }
+            } catch (error) {
+                console.error('Failed to load transaction details:', error);
+                showNotification('Failed to load transaction details', 'error');
+            }
+        });
+        
+        editTransactionForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const transactionId = editTransactionForm.dataset.transactionId;
+            
+            if (!transactionId) {
+                showNotification('Transaction ID not found', 'error');
+                return;
+            }
+            
+            const formData = {
+                account_id: document.getElementById('edit-transaction-account').value,
+                category_id: document.getElementById('edit-transaction-category').value || null,
+                amount: parseFloat(document.getElementById('edit-transaction-amount').value),
+                description: document.getElementById('edit-transaction-description').value,
+                transaction_date: document.getElementById('edit-transaction-date').value,
+                transaction_type: document.getElementById('edit-transaction-type').value,
+                is_recurring: document.getElementById('edit-transaction-recurring').checked
+            };
+            
+            // Add notes if provided
+            const notes = document.getElementById('edit-transaction-notes').value;
+            if (notes) {
+                formData.notes = notes;
+            }
+            
+            try {
+                await fetchAPI(`${API_ENDPOINTS.transactions}/${transactionId}`, 'PUT', formData);
+                showNotification('Transaction updated successfully', 'success');
+                closeModal('edit-transaction-modal');
+                
+                // Refresh data
+                loadTransactions(5, document.getElementById('account-filter').value);
+                loadAccounts();
+            } catch (error) {
+                console.error('Failed to update transaction:', error);
+                showNotification('Failed to update transaction', 'error');
+            }
+        });
+    }
+    
+    // Ensure deletion works
+    window.deleteTransaction = async function(transactionId) {
+        if (confirm('Are you sure you want to delete this transaction?')) {
+            try {
+                await fetchAPI(`${API_ENDPOINTS.transactions}/${transactionId}`, 'DELETE');
+                showNotification('Transaction deleted successfully', 'success');
+                
+                // Refresh data
+                const accountId = document.getElementById('account-filter').value;
+                loadTransactions(5, accountId);
+                loadAccounts();
+            } catch (error) {
+                console.error('Failed to delete transaction:', error);
+                showNotification('Failed to delete transaction', 'error');
+            }
+        }
+    };
+}
+
+// Call this function after document is loaded
+initializeTransactionHandling();
+    </script>
+</body>
+</html>

@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bills - Spendo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .bills-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .bills-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .bills-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .bills-filter {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .filter-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .filter-label {
+            margin-right: 8px;
+            font-weight: 600;
+        }
+        
+        .filter-select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        
+        .bills-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-card {
+            background-color: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .summary-title {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        
+        .summary-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+        
+        .summary-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-tertiary);
+            margin-top: 5px;
+        }
+        
+        .bills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .bill-card {
+            background-color: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .bill-card.paid {
+            border: 2px solid var(--success-color);
+        }
+        
+        .bill-card.overdue {
+            border: 2px solid var(--danger-color);
+        }
+        
+        .bill-card.due-today {
+            border: 2px solid var(--warning-color);
+        }
+        
+        .bill-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .bill-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .bill-company {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+        
+        .bill-type {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .bill-amount {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: var(--danger-color);
+        }
+        
+        .bill-due {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .bill-due i {
+            margin-right: 8px;
+        }
+        
+        .bill-due.overdue {
+            color: var(--danger-color);
+            font-weight: 700;
+        }
+        
+        .bill-due.due-today {
+            color: var(--warning-color);
+            font-weight: 700;
+        }
+        
+        .bill-due.due-soon {
+            color: var(--warning-color);
+        }
+        
+        .bill-auto-pay {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .bill-auto-pay i {
+            margin-right: 8px;
+            color: var(--success-color);
+        }
+        
+        .bill-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: auto;
+        }
+        
+        .bill-action-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .bill-action-btn.primary {
+            background-color: var(--primary-color);
+            color: var(--text-on-accent);
+        }
+        
+        .bill-action-btn.primary:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .bill-action-btn.secondary {
+            background-color: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+        
+        .bill-action-btn.secondary:hover {
+            background-color: var(--bg-accent);
+            color: var(--text-primary);
+        }
+        
+        .add-bill-card {
+            background-color: var(--bg-tertiary);
+            border: 2px dashed var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            height: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .add-bill-card:hover {
+            border-color: var(--primary-color);
+            background-color: var(--primary-light);
+        }
+        
+        .add-bill-card i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        .add-bill-card p {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .bills-history {
+            background-color: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .bills-history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .bills-history-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        
+        .payments-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .payments-table th,
+        .payments-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .payments-table th {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-badge.paid {
+            background-color: var(--success-light);
+            color: var(--success-color);
+        }
+        
+        .status-badge.overdue {
+            background-color: var(--danger-light);
+            color: var(--danger-color);
+        }
+        
+        .status-badge.upcoming {
+            background-color: var(--info-light);
+            color: var(--info-color);
+        }
+        
+        @media (max-width: 768px) {
+            .bills-filter {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-wallet"></i></div>
+                <h1>Spendo</h1>
+            </div>
+            <div class="nav-menu">
+                <a href="/dashboard" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/accounts" class="nav-link">
+                    <i class="fas fa-landmark"></i>
+                    <span>Accounts</span>
+                </a>
+                <a href="/transactions" class="nav-link">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Transactions</span>
+                </a>
+                <a href="/budget" class="nav-link">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Budget</span>
+                </a>
+                <a href="/goals" class="nav-link">
+                    <i class="fas fa-bullseye"></i>
+                    <span>Goals</span>
+                </a>
+                <a href="/bills" class="nav-link active">
+                    <i class="fas fa-file-invoice"></i>
+                    <span>Bills</span>
+                </a>
+                <a href="/education" class="nav-link">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Education</span>
+                </a>
+                <a href="/settings" class="nav-link">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </div>
+            <div class="account-section">
+                <div class="account-info">
+                    <div class="account-avatar">JD</div>
+                    <div class="account-details">
+                        <h4 id="user-name">John Doe</h4>
+                        <div class="account-actions">
+                            <button id="logout-btn" title="Logout">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-left">
+                    <button id="menu-toggle" title="Toggle Menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="greeting">
+                        <h2>Bills & Subscriptions</h2>
+                        <p>Manage your recurring bills and payments</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button id="theme-toggle" title="Toggle Theme">
+                        <i class="fas fa-moon"></i>
+                        <i class="fas fa-sun" style="display: none;"></i>
+                    </button>
+                    <button id="refresh-btn" class="action-btn" title="Refresh Data">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Refresh</span>
+                    </button>
+                    <button class="action-btn primary" id="add-bill-btn" onclick="openModal('add-bill-modal')">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Bill</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bills Content -->
+            <div class="bills-container">
+                <!-- Bills Filter -->
+                <div class="bills-header">
+                    <div class="bills-filter">
+                        <div class="filter-item">
+                            <label class="filter-label">Status:</label>
+                            <select id="status-filter" class="filter-select">
+                                <option value="all">All Bills</option>
+                                <option value="unpaid" selected>Upcoming</option>
+                                <option value="overdue">Overdue</option>
+                                <option value="paid">Paid</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label class="filter-label">Category:</label>
+                            <select id="category-filter" class="filter-select">
+                                <option value="all">All Categories</option>
+                                <!-- Options will be populated by JavaScript -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bills Summary -->
+                <div class="bills-summary">
+                    <div class="summary-card">
+                        <div class="summary-title">Total Monthly Bills</div>
+                        <div class="summary-value" id="total-monthly-bills">₹0.00</div>
+                        <div class="summary-subtitle" id="monthly-bill-count">0 recurring bills</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-title">Due This Month</div>
+                        <div class="summary-value danger-value" id="due-this-month">₹0.00</div>
+                        <div class="summary-subtitle" id="due-bill-count">0 bills due</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-title">Paid This Month</div>
+                        <div class="summary-value" id="paid-this-month">₹0.00</div>
+                        <div class="summary-subtitle" id="paid-percentage">0% of monthly bills</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-title">Overdue Bills</div>
+                        <div class="summary-value danger-value" id="overdue-amount">₹0.00</div>
+                        <div class="summary-subtitle" id="overdue-count">0 bills overdue</div>
+                    </div>
+                </div>
+
+                <!-- Bills Grid -->
+                <div class="bills-grid" id="bills-grid">
+                    <!-- Bills will be populated by JavaScript -->
+                    <div class="add-bill-card" onclick="openModal('add-bill-modal')">
+                        <i class="fas fa-plus-circle"></i>
+                        <p>Add New Bill</p>
+                    </div>
+                </div>
+
+                <!-- Payment History -->
+                <div class="bills-history">
+                    <div class="bills-history-header">
+                        <div class="bills-history-title">Recent Payments</div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="payments-table">
+                            <thead>
+                                <tr>
+                                    <th>Bill</th>
+                                    <th>Amount</th>
+                                    <th>Due Date</th>
+                                    <th>Payment Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payments-table-body">
+                                <!-- Table rows will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add Bill Modal -->
+    <div id="add-bill-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Add New Bill</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-bill-form">
+                    <div class="form-group">
+                        <label for="bill-name">Bill Name</label>
+                        <input type="text" id="bill-name" name="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bill-description">Description (Optional)</label>
+                        <textarea id="bill-description" name="description" class="form-control" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="bill-amount">Amount</label>
+                        <input type="number" id="bill-amount" name="amount" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bill-due-date">Due Date</label>
+                        <input type="date" id="bill-due-date" name="due_date" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bill-frequency">Frequency</label>
+                        <select id="bill-frequency" name="frequency" class="form-control" required>
+                            <option value="MONTHLY">Monthly</option>
+                            <option value="WEEKLY">Weekly</option>
+                            <option value="YEARLY">Yearly</option>
+                            <option value="ONCE">One Time</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="bill-category">Category (Optional)</label>
+                        <select id="bill-category" name="category_id" class="form-control category-select">
+                            <option value="">-- Select Category --</option>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="bill-account">Account for Auto-Pay (Optional)</label>
+                        <select id="bill-account" name="account_id" class="form-control account-select">
+                            <option value="">-- Select Account --</option>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="bill-auto-pay" name="auto_pay">
+                            <span>Auto Pay</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="bill-reminder">Reminder Days</label>
+                        <input type="number" id="bill-reminder" name="reminder_days" class="form-control" min="0" value="3">
+                        <small class="form-text">Days before due date to receive a reminder</small>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Bill</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Bill Modal -->
+    <div id="edit-bill-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Edit Bill</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-bill-form">
+                    <div class="form-group">
+                        <label for="edit-bill-name">Bill Name</label>
+                        <input type="text" id="edit-bill-name" name="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-bill-description">Description (Optional)</label>
+                        <textarea id="edit-bill-description" name="description" class="form-control" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-bill-amount">Amount</label>
+                        <input type="number" id="edit-bill-amount" name="amount" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-bill-due-date">Due Date</label>
+                        <input type="date" id="edit-bill-due-date" name="due_date" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-bill-frequency">Frequency</label>
+                        <select id="edit-bill-frequency" name="frequency" class="form-control" required>
+                            <option value="MONTHLY">Monthly</option>
+                            <option value="WEEKLY">Weekly</option>
+                            <option value="YEARLY">Yearly</option>
+                            <option value="ONCE">One Time</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-bill-category">Category (Optional)</label>
+                        <select id="edit-bill-category" name="category_id" class="form-control category-select">
+                            <option value="">-- Select Category --</option>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-bill-account">Account for Auto-Pay (Optional)</label>
+                        <select id="edit-bill-account" name="account_id" class="form-control account-select">
+                            <option value="">-- Select Account --</option>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="edit-bill-auto-pay" name="auto_pay">
+                            <span>Auto Pay</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-bill-reminder">Reminder Days</label>
+                        <input type="number" id="edit-bill-reminder" name="reminder_days" class="form-control" min="0" value="3">
+                        <small class="form-text">Days before due date to receive a reminder</small>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pay Bill Modal -->
+    <div id="pay-bill-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Pay Bill: <span id="pay-bill-name"></span></h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="pay-bill-form">
+                    <div class="form-group">
+                        <label for="pay-bill-account">Pay From Account</label>
+                        <select id="pay-bill-account" name="account_id" class="form-control account-select" required>
+                            <option value="">-- Select Account --</option>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pay-bill-amount">Amount</label>
+                        <input type="number" id="pay-bill-amount" name="amount" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="pay-bill-date">Payment Date</label>
+                        <input type="date" id="pay-bill-date" name="payment_date" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="pay-bill-notes">Notes</label>
+                        <textarea id="pay-bill-notes" name="notes" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Pay Bill</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification-container"></div>
+
+    <!-- Load Main JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+    // Initial load - make sure these functions exist globally in main.js
+    try {
+        // Check if the functions exist before calling them
+        if (typeof loadAccounts === 'function') {
+            loadAccounts();
+        } else {
+            console.error("loadAccounts function not found");
+        }
+        
+        if (typeof loadCategories === 'function') {
+            loadCategories();
+        } else {
+            console.error("loadCategories function not found");
+            // Fallback for loading categories
+            (async function() {
+                try {
+                    const response = await fetch('/api/categories');
+                    const data = await response.json();
+                    
+                    const categorySelect = document.getElementById('bill-category');
+                    const editCategorySelect = document.getElementById('edit-bill-category');
+                    
+                    if (categorySelect && data.categories) {
+                        // Clear existing options
+                        categorySelect.innerHTML = '<option value="">-- Select Category --</option>';
+                        
+                        // Add categories
+                        const expenseCategories = data.categories.filter(cat => cat.type === 'EXPENSE');
+                        expenseCategories.forEach(category => {
+                            const option = document.createElement('option');
+                            option.value = category.id;
+                            option.textContent = category.name;
+                            categorySelect.appendChild(option);
+                        });
+                    }
+                    
+                    if (editCategorySelect && data.categories) {
+                        // Clear existing options
+                        editCategorySelect.innerHTML = '<option value="">-- Select Category --</option>';
+                        
+                        // Add categories
+                        const expenseCategories = data.categories.filter(cat => cat.type === 'EXPENSE');
+                        expenseCategories.forEach(category => {
+                            const option = document.createElement('option');
+                            option.value = category.id;
+                            option.textContent = category.name;
+                            editCategorySelect.appendChild(option);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Failed to load categories:', error);
+                }
+            })();
+        }
+        
+        if (typeof loadBills === 'function') {
+            loadBills();
+        } else {
+            console.error("loadBills function not found");
+        }
+        
+        if (typeof setupBillForms === 'function') {
+            setupBillForms();
+        } else {
+            console.error("setupBillForms function not found");
+        }
+        
+        setupFilterHandlers();
+        setupRefreshButton();
+    } catch (error) {
+        console.error("Error during bills page initialization:", error);
+    }
+    
+    // Setup filter handlers
+    function setupFilterHandlers() {
+        const statusFilter = document.getElementById('status-filter');
+        const categoryFilter = document.getElementById('category-filter');
+        
+        if (statusFilter) {
+            statusFilter.addEventListener('change', function() {
+                filterBills();
+            });
+        }
+        
+        if (categoryFilter) {
+            categoryFilter.addEventListener('change', function() {
+                filterBills();
+            });
+        }
+    }
+    
+    // Setup refresh button
+    function setupRefreshButton() {
+        const refreshBtn = document.getElementById('refresh-btn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', function() {
+                if (typeof loadBills === 'function') {
+                    loadBills();
+                    showNotification('Bills data refreshed successfully', 'success');
+                } else {
+                    console.error("loadBills function not found");
+                    showNotification('Failed to refresh bills data', 'error');
+                }
+            });
+        }
+    }
+    
+    // Filter bills based on selected filters
+    function filterBills() {
+        const statusFilter = document.getElementById('status-filter').value;
+        const categoryFilter = document.getElementById('category-filter').value;
+        
+        // Get all bill cards
+        const billCards = document.querySelectorAll('.bill-card');
+        
+        billCards.forEach(card => {
+            let showCard = true;
+            
+            // Apply status filter
+            if (statusFilter !== 'all') {
+                const cardStatus = card.dataset.status;
+                if (statusFilter === 'unpaid' && cardStatus !== 'upcoming') {
+                    showCard = false;
+                } else if (statusFilter === 'overdue' && cardStatus !== 'overdue') {
+                    showCard = false;
+                } else if (statusFilter === 'paid' && cardStatus !== 'paid') {
+                    showCard = false;
+                }
+            }
+            
+            // Apply category filter
+            if (categoryFilter !== 'all' && showCard) {
+                const cardCategory = card.dataset.category;
+                if (categoryFilter !== cardCategory) {
+                    showCard = false;
+                }
+            }
+            
+            // Show or hide card
+            card.style.display = showCard ? 'block' : 'none';
+        });
+    }
+    
+    // Helper function to show notifications if the main one isn't available
+    function showNotification(message, type = 'info') {
+        if (typeof window.showNotification === 'function') {
+            window.showNotification(message, type);
+        } else {
+            console.log(`[${type}] ${message}`);
+            alert(message);
+        }
+    }
+});
+    </script>
+</body>
+</html>

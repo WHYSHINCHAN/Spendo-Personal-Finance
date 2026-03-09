@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spendo - Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container" id="dashboard-section">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-wallet"></i></div>
+                <h1>Spendo</h1>
+            </div>
+            <div class="nav-menu">
+                <a href="/dashboard" class="nav-link active">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/accounts" class="nav-link">
+                    <i class="fas fa-landmark"></i>
+                    <span>Accounts</span>
+                </a>
+                <a href="/transactions" class="nav-link">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Transactions</span>
+                </a>
+                <a href="/budget" class="nav-link">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Budget</span>
+                </a>
+                <a href="/goals" class="nav-link">
+                    <i class="fas fa-bullseye"></i>
+                    <span>Goals</span>
+                </a>
+                <a href="/bills" class="nav-link">
+                    <i class="fas fa-file-invoice"></i>
+                    <span>Bills</span>
+                </a>
+                <a href="/education" class="nav-link">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Education</span>
+                </a>
+                <a href="/settings" class="nav-link">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+                <!-- Added Logout Button Below Settings -->
+                <a href="#" id="sidebar-logout-btn" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+            <div class="account-section">
+                <div class="account-info">
+                    <div class="account-avatar">JD</div>
+                    <div class="account-details">
+                        <h4 id="user-name">John Doe</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-left">
+                    <button id="menu-toggle" title="Toggle Menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="greeting">
+                        <h2>Welcome back, <span id="welcome-name">John</span>!</h2>
+                        <p>Here's your financial summary as of <span id="current-date">March 28, 2025</span></p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button id="theme-toggle" title="Toggle Theme">
+                        <i class="fas fa-moon"></i>
+                        <i class="fas fa-sun" style="display: none;"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dashboard Grid -->
+            <div class="dashboard-grid">
+                <!-- Balance Section -->
+                <div class="balance-section">
+                    <div class="balance-card income">
+                        <div class="balance-label">Total Income</div>
+                        <div class="balance-amount">₹0.00</div>
+                        <div class="balance-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>0% from last month</span>
+                        </div>
+                    </div>
+                    <div class="balance-card expenses">
+                        <div class="balance-label">Total Expenses</div>
+                        <div class="balance-amount">₹0.00</div>
+                        <div class="balance-change negative">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>0% from last month</span>
+                        </div>
+                    </div>
+                    <div class="balance-card savings">
+                        <div class="balance-label">Total Savings</div>
+                        <div class="balance-amount">₹0.00</div>
+                        <div class="balance-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>0% savings rate</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accounts Section -->
+                <div class="accounts-section card">
+                    <div class="card-header">
+                        <div class="card-title">My Accounts</div>
+                    </div>
+                    <div class="accounts-list">
+                        <!-- Account cards will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Monthly Overview -->
+                <div class="monthly-overview card">
+                    <div class="card-header">
+                        <div class="card-title">Monthly Overview</div>
+                        <div class="card-action">
+                            <select id="monthSelect">
+                                <!-- Options will be populated by JavaScript -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="monthlyChart">
+                        <canvas id="monthlyChartCanvas" width="400" height="200"></canvas>
+                       
+                    </div>
+                </div>
+
+              <!-- Spending Category -->
+<div class="spending-category card">
+    <div class="card-header">
+        <div class="card-title">Spending by Category</div>
+        <div class="card-action">
+            <a href="/budget">View All</a>
+        </div>
+    </div>
+    <div class="chart-container">
+        <canvas id="categoryPieChart" width="400" height="200"></canvas>
+    </div>
+    <div class="category-list">
+        <!-- Category items will be populated by JavaScript -->
+    </div>
+</div>
+
+                <!-- Goals -->
+                <div class="goals card">
+                    <div class="card-header">
+                        <div class="card-title">Saving Goals</div>
+                        <div class="card-action" id="add-goal-btn">+ Add Goal</div>
+                    </div>
+                    <div class="goal-list">
+                        <!-- Goal items will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Transactions -->
+                <div class="transactions card">
+                    <div class="card-header">
+                        <div class="card-title">Recent Transactions</div>
+                        <div class="card-action">
+                            <a href="/transactions">View All</a>
+                        </div>
+                    </div>
+                    <div class="transaction-list">
+                        <!-- Transaction items will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Bills -->
+                <div class="bills card">
+                    <div class="card-header">
+                        <div class="card-title">Upcoming Bills</div>
+                        <div class="card-action">
+                            <a href="/bills">View All</a>
+                        </div>
+                    </div>
+                    <div class="bills-list">
+                        <!-- Bill items will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Budget -->
+                <div class="budget card">
+                    <div class="card-header">
+                        <div class="card-title">Monthly Budget</div>
+                        <div class="card-action">
+                            <select id="budgetMonth">
+                                <!-- Options will be populated by JavaScript -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="budget-overview">
+                        <div class="budget-stat">
+                            <div class="budget-stat-label">Total Budget</div>
+                            <div class="budget-stat-value">₹0.00</div>
+                        </div>
+                        <div class="budget-stat">
+                            <div class="budget-stat-label">Spent</div>
+                            <div class="budget-stat-value">₹0.00</div>
+                        </div>
+                        <div class="budget-stat">
+                            <div class="budget-stat-label">Remaining</div>
+                            <div class="budget-stat-value">₹0.00</div>
+                        </div>
+                    </div>
+                    <div class="budget-list">
+                        <!-- Budget items will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Credit Suggestions -->
+                <div class="credit-suggestions card">
+                    <div class="card-header">
+                        <div class="card-title">Credit Improvement Tips</div>
+                    </div>
+                    <div class="suggestion-list">
+                        <!-- Suggestion items will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Education -->
+                <div class="education card">
+                    <div class="card-header">
+                        <div class="card-title">Financial Education</div>
+                        <div class="card-action">
+                            <a href="/education">View All</a>
+                        </div>
+                    </div>
+                    <div class="education-list">
+                        <!-- Education items will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add Account Modal -->
+    <div id="add-account-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Add New Account</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-account-form">
+                    <div class="form-group">
+                        <label for="account-name">Account Name</label>
+                        <input type="text" id="account-name" name="account_name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="account-type">Account Type</label>
+                        <select id="account-type" name="account_type" class="form-control" required>
+                            <option value="CHECKING">Checking</option>
+                            <option value="SAVINGS">Savings</option>
+                            <option value="CREDIT">Credit Card</option>
+                            <option value="INVESTMENT">Investment</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="account-balance">Current Balance</label>
+                        <input type="number" id="account-balance" name="balance" class="form-control" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="account-number">Account Number (Last 4 digits)</label>
+                        <input type="text" id="account-number" name="account_number" class="form-control" maxlength="4" pattern="[0-9]{4}">
+                    </div>
+                    <div class="form-group">
+                        <label for="institution">Institution Name</label>
+                        <input type="text" id="institution" name="institution" class="form-control">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Account</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Account Modal -->
+    <div id="edit-account-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Edit Account</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-account-form">
+                    <div class="form-group">
+                        <label for="edit-account-name">Account Name</label>
+                        <input type="text" id="edit-account-name" name="account_name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-account-type">Account Type</label>
+                        <select id="edit-account-type" name="account_type" class="form-control" required>
+                            <option value="CHECKING">Checking</option>
+                            <option value="SAVINGS">Savings</option>
+                            <option value="CREDIT">Credit Card</option>
+                            <option value="INVESTMENT">Investment</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-account-balance">Current Balance</label>
+                        <input type="number" id="edit-account-balance" name="balance" class="form-control" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-account-number">Account Number (Last 4 digits)</label>
+                        <input type="text" id="edit-account-number" name="account_number" class="form-control" maxlength="4" pattern="[0-9]{4}">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-institution">Institution Name</label>
+                        <input type="text" id="edit-institution" name="institution" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="edit-is-active" name="is_active" checked>
+                            <span>Active</span>
+                        </label>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Transaction Modal -->
+    <div id="add-transaction-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Add New Transaction</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-transaction-form">
+                    <div class="form-group">
+                        <label for="transaction-type">Transaction Type</label>
+                        <select id="transaction-type" name="transaction_type" class="form-control transaction-type-select" data-category-select="transaction-category" required>
+                            <option value="EXPENSE">Expense</option>
+                            <option value="INCOME">Income</option>
+                            <option value="TRANSFER">Transfer</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="transaction-account">From Account</label>
+                        <select id="transaction-account" name="account_id" class="form-control account-select" required>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group transfer-fields" style="display: none;">
+                        <label for="transfer-account">To Account</label>
+                        <select id="transfer-account" name="transfer_account_id" class="form-control account-select">
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="transaction-category">Category</label>
+                        <select id="transaction-category" name="category_id" class="form-control category-select">
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="transaction-amount">Amount</label>
+                        <input type="number" id="transaction-amount" name="amount" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="transaction-description">Description</label>
+                        <input type="text" id="transaction-description" name="description" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="transaction-date">Date</label>
+                        <input type="date" id="transaction-date" name="transaction_date" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="transaction-recurring" name="is_recurring">
+                            <span>Recurring Transaction</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="transaction-notes">Notes</label>
+                        <textarea id="transaction-notes" name="notes" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Transaction</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Transaction Modal -->
+    <div id="edit-transaction-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Edit Transaction</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-transaction-form">
+                    <!-- Same fields as add transaction form, with "edit-" prefix -->
+                    <div class="form-group">
+                        <label for="edit-transaction-type">Transaction Type</label>
+                        <select id="edit-transaction-type" name="transaction_type" class="form-control transaction-type-select" data-category-select="edit-transaction-category" required>
+                            <option value="EXPENSE">Expense</option>
+                            <option value="INCOME">Income</option>
+                            <option value="TRANSFER">Transfer</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-transaction-account">From Account</label>
+                        <select id="edit-transaction-account" name="account_id" class="form-control account-select" required>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group edit-transfer-fields" style="display: none;">
+                        <label for="edit-transfer-account">To Account</label>
+                        <select id="edit-transfer-account" name="transfer_account_id" class="form-control account-select">
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-transaction-category">Category</label>
+                        <select id="edit-transaction-category" name="category_id" class="form-control category-select">
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-transaction-amount">Amount</label>
+                        <input type="number" id="edit-transaction-amount" name="amount" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-transaction-description">Description</label>
+                        <input type="text" id="edit-transaction-description" name="description" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-transaction-date">Date</label>
+                        <input type="date" id="edit-transaction-date" name="transaction_date" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="edit-transaction-recurring" name="is_recurring">
+                            <span>Recurring Transaction</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-transaction-notes">Notes</label>
+                        <textarea id="edit-transaction-notes" name="notes" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Goal Modal -->
+    <div id="add-goal-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Add New Goal</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-goal-form">
+                    <div class="form-group">
+                        <label for="goal-name">Goal Name</label>
+                        <input type="text" id="goal-name" name="goal_name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="goal-target-amount">Target Amount</label>
+                        <input type="number" id="goal-target-amount" name="target_amount" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="goal-current-amount">Current Amount (Optional)</label>
+                        <input type="number" id="goal-current-amount" name="current_amount" class="form-control" step="0.01" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="goal-target-date">Target Date (Optional)</label>
+                        <input type="date" id="goal-target-date" name="target_date" class="form-control">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Goal</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Goal Modal -->
+    <div id="edit-goal-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Edit Goal</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-goal-form">
+                    <div class="form-group">
+                        <label for="edit-goal-name">Goal Name</label>
+                        <input type="text" id="edit-goal-name" name="goal_name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-goal-target-amount">Target Amount</label>
+                        <input type="number" id="edit-goal-target-amount" name="target_amount" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-goal-current-amount">Current Amount</label>
+                        <input type="number" id="edit-goal-current-amount" name="current_amount" class="form-control" step="0.01" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-goal-target-date">Target Date (Optional)</label>
+                        <input type="date" id="edit-goal-target-date" name="target_date" class="form-control">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contribute to Goal Modal -->
+    <div id="contribute-goal-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Add Contribution to Goal</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="contribute-goal-form">
+                    <div class="form-group">
+                        <label for="contribution-amount">Contribution Amount</label>
+                        <input type="number" id="contribution-amount" name="amount" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contribution-date">Contribution Date</label>
+                        <input type="date" id="contribution-date" name="contribution_date" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contribution-account">From Account (Optional)</label>
+                        <select id="contribution-account" name="account_id" class="form-control account-select">
+                            <option value="">-- Select Account --</option>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="contribution-notes">Notes</label>
+                        <textarea id="contribution-notes" name="notes" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Contribution</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Bill Modal -->
+    <div id="add-bill-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Add New Bill</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-bill-form">
+                    <div class="form-group">
+                        <label for="bill-name">Bill Name</label>
+                        <input type="text" id="bill-name" name="bill_name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bill-description">Description (Optional)</label>
+                        <input type="text" id="bill-description" name="description" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="bill-amount">Amount</label>
+                        <input type="number" id="bill-amount" name="amount" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bill-due-date">Due Date</label>
+                        <input type="date" id="bill-due-date" name="due_date" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bill-frequency">Frequency</label>
+                        <select id="bill-frequency" name="frequency" class="form-control" required>
+                            <option value="MONTHLY">Monthly</option>
+                            <option value="WEEKLY">Weekly</option>
+                            <option value="YEARLY">Yearly</option>
+                            <option value="ONCE">One Time</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="bill-category">Category (Optional)</label>
+                        <select id="bill-category" name="category_id" class="form-control category-select">
+                            <option value="">-- Select Category --</option>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="bill-auto-pay" name="auto_pay">
+                            <span>Auto Pay</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="bill-reminder">Reminder Days</label>
+                        <input type="number" id="bill-reminder" name="reminder_days" class="form-control" min="0" value="3">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Bill</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pay Bill Modal -->
+    <div id="pay-bill-modal" class="modal" data-bill-id="">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Pay Bill: <span id="pay-bill-name"></span></h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="pay-bill-form">
+                    <div class="form-group">
+                        <label for="pay-bill-account">Pay From Account</label>
+                        <select id="pay-bill-account" name="account_id" class="form-control account-select" required>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pay-bill-amount">Amount</label>
+                        <input type="number" id="pay-bill-amount" name="amount" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="pay-bill-date">Payment Date</label>
+                        <input type="date" id="pay-bill-date" name="payment_date" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="pay-bill-notes">Notes</label>
+                        <textarea id="pay-bill-notes" name="notes" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Pay Bill</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Budget Modal -->
+    <div id="add-budget-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Add Budget Item</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-budget-form">
+                    <div class="form-group">
+                        <label for="budget-category">Category</label>
+                        <select id="budget-category" name="category_id" class="form-control" required>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="budget-amount">Budget Amount</label>
+                        <input type="number" id="budget-amount" name="amount" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="budget-month">Month</label>
+                        <select id="budget-month" name="month" class="form-control" required>
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="budget-year">Year</label>
+                        <input type="number" id="budget-year" name="year" class="form-control" min="2000" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Budget</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Budget Modal -->
+    <div id="edit-budget-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Edit Budget Item</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-budget-form">
+                    <div class="form-group">
+                        <label for="edit-budget-category">Category</label>
+                        <select id="edit-budget-category" name="category_id" class="form-control" required>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-budget-amount">Budget Amount</label>
+                        <input type="number" id="edit-budget-amount" name="amount" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-budget-month">Month</label>
+                        <select id="edit-budget-month" name="month" class="form-control" required>
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-budget-year">Year</label>
+                        <input type="number" id="edit-budget-year" name="year" class="form-control" min="2000" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Budget</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification-container"></div>
+
+    <!-- Load Chart.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js">
+        console.log("Chart.js loaded:", typeof Chart !== 'undefined');
+    </script>
+    
+    <!-- Load Main JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

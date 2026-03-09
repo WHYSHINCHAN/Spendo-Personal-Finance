@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget - Spendo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .budget-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .budget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .month-selector {
+            display: flex;
+            align-items: center;
+        }
+        
+        .month-selector h3 {
+            margin-right: 15px;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        
+        .month-selector select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        
+        .budget-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-card {
+            background-color: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .summary-title {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        
+        .summary-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+        
+        .summary-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-tertiary);
+            margin-top: 5px;
+        }
+        
+        .budget-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 20px;
+        }
+        
+        .budget-categories {
+            grid-column: span 8;
+        }
+        
+        .budget-chart {
+            grid-column: span 4;
+        }
+        
+        .budget-categories-card {
+            background-color: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .budget-chart-card {
+            background-color: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            height: 100%;
+        }
+        
+        .budget-categories-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .budget-categories-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        
+        .budget-item {
+            padding: 15px;
+            border-radius: 10px;
+            background-color: var(--bg-tertiary);
+            margin-bottom: 15px;
+        }
+        
+        .budget-item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .budget-item-category {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+        }
+        
+        .budget-item-category i {
+            margin-right: 8px;
+        }
+        
+        .budget-item-amount {
+            font-weight: 700;
+        }
+        
+        .budget-item-progress {
+            height: 8px;
+            background-color: var(--bg-primary);
+            border-radius: 4px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        
+        .budget-item-bar {
+            height: 100%;
+            background-color: var(--success-color);
+            border-radius: 4px;
+        }
+        
+        .budget-item-bar.warning {
+            background-color: var(--warning-color);
+        }
+        
+        .budget-item-bar.danger {
+            background-color: var(--danger-color);
+        }
+        
+        .budget-item-status {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+        }
+        
+        .budget-item-spent {
+            color: var(--text-secondary);
+        }
+        
+        .budget-item-left {
+            font-weight: 600;
+        }
+        
+        .budget-item-left.good {
+            color: var(--success-color);
+        }
+        
+        .budget-item-left.warning {
+            color: var(--warning-color);
+        }
+        
+        .budget-item-left.danger {
+            color: var(--danger-color);
+        }
+        
+        .budget-item-actions {
+            margin-top: 10px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .budget-item-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            margin-left: 10px;
+            transition: color 0.3s ease;
+        }
+        
+        .budget-item-btn:hover {
+            color: var(--primary-color);
+        }
+        
+        .add-budget-item {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .chart-container {
+            height: 300px;
+            width: 100%;
+        }
+        
+        .budget-spending-card {
+            background-color: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            margin-top: 30px;
+        }
+        
+        .spending-analysis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .spending-analysis-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        
+        .spending-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .spending-table th,
+        .spending-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .spending-table th {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        
+        .percentage-bar {
+            height: 8px;
+            background-color: var(--bg-primary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        
+        .percentage-bar-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            border-radius: 4px;
+        }
+        
+        @media (max-width: 992px) {
+            .budget-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .budget-categories, .budget-chart {
+                grid-column: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-wallet"></i></div>
+                <h1>Spendo</h1>
+            </div>
+            <div class="nav-menu">
+                <a href="/dashboard" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/accounts" class="nav-link">
+                    <i class="fas fa-landmark"></i>
+                    <span>Accounts</span>
+                </a>
+                <a href="/transactions" class="nav-link">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Transactions</span>
+                </a>
+                <a href="/budget" class="nav-link active">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Budget</span>
+                </a>
+                <a href="/goals" class="nav-link">
+                    <i class="fas fa-bullseye"></i>
+                    <span>Goals</span>
+                </a>
+                <a href="/bills" class="nav-link">
+                    <i class="fas fa-file-invoice"></i>
+                    <span>Bills</span>
+                </a>
+                <a href="/education" class="nav-link">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Education</span>
+                </a>
+                <a href="/settings" class="nav-link">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </div>
+            <div class="account-section">
+                <div class="account-info">
+                    <div class="account-avatar">JD</div>
+                    <div class="account-details">
+                        <h4 id="user-name">John Doe</h4>
+                        <div class="account-actions">
+                            <button id="logout-btn" title="Logout">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-left">
+                    <button id="menu-toggle" title="Toggle Menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="greeting">
+                        <h2>Budget</h2>
+                        <p>Plan and track your monthly spending</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button id="theme-toggle" title="Toggle Theme">
+                        <i class="fas fa-moon"></i>
+                        <i class="fas fa-sun" style="display: none;"></i>
+                    </button>
+                    <button id="refresh-btn" class="action-btn" title="Refresh Data">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Refresh</span>
+                    </button>
+                    <button class="action-btn primary" id="add-budget-btn" onclick="openModal('add-budget-modal')">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Budget</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Budget Content -->
+            <div class="budget-container">
+                <!-- Month Selector -->
+                <div class="budget-header">
+                    <div class="month-selector">
+                        <h3>Budget for:</h3>
+                        <select id="budget-month-select">
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Budget Summary -->
+                <div class="budget-summary">
+                    <div class="summary-card">
+                        <div class="summary-title">Total Budget</div>
+                        <div class="summary-value" id="total-budget">₹0.00</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-title">Spent So Far</div>
+                        <div class="summary-value" id="total-spent">₹0.00</div>
+                        <div class="summary-subtitle" id="spent-percentage">0% of budget</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-title">Remaining</div>
+                        <div class="summary-value" id="total-remaining">₹0.00</div>
+                        <div class="summary-subtitle" id="remaining-days">0 days left</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-title">Daily Budget</div>
+                        <div class="summary-value" id="daily-budget">₹0.00</div>
+                        <div class="summary-subtitle">per day remaining</div>
+                    </div>
+                </div>
+
+                <!-- Budget Grid -->
+                <div class="budget-grid">
+                    <!-- Budget Categories -->
+                    <div class="budget-categories">
+                        <div class="budget-categories-card">
+                            <div class="budget-categories-header">
+                                <div class="budget-categories-title">Category Budgets</div>
+                            </div>
+                            <div id="budget-items-container">
+                                <!-- Budget items will be populated by JavaScript -->
+                            </div>
+                            <div class="add-budget-item">
+                                <button class="btn btn-outline" onclick="openModal('add-budget-modal')">
+                                    <i class="fas fa-plus"></i> Add Budget Category
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Budget Chart -->
+                    <div class="budget-chart">
+                        <div class="budget-chart-card">
+                            <div class="budget-categories-title">Budget Allocation</div>
+                            <div class="chart-container">
+                                <canvas id="budget-pie-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spending Analysis -->
+                <div class="budget-spending-card">
+                    <div class="spending-analysis-header">
+                        <div class="spending-analysis-title">Spending Analysis</div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="spending-table">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Budget</th>
+                                    <th>Spent</th>
+                                    <th>Remaining</th>
+                                    <th>% of Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="spending-table-body">
+                                <!-- Table rows will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add Budget Modal -->
+    <div id="add-budget-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Add Budget Item</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-budget-form">
+                    <div class="form-group">
+                        <label for="budget-category">Category</label>
+                        <select id="budget-category" name="category_id" class="form-control" required>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="budget-amount">Budget Amount</label>
+                        <input type="number" id="budget-amount" name="amount" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="budget-month">Month</label>
+                        <select id="budget-month" name="month" class="form-control" required>
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="budget-year">Year</label>
+                        <input type="number" id="budget-year" name="year" class="form-control" min="2000" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Budget</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Budget Modal -->
+    <div id="edit-budget-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Edit Budget Item</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-budget-form">
+                    <div class="form-group">
+                        <label for="edit-budget-category">Category</label>
+                        <select id="edit-budget-category" name="category_id" class="form-control" required>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-budget-amount">Budget Amount</label>
+                        <input type="number" id="edit-budget-amount" name="amount" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-budget-month">Month</label>
+                        <select id="edit-budget-month" name="month" class="form-control" required>
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-budget-year">Year</label>
+                        <input type="number" id="edit-budget-year" name="year" class="form-control" min="2000" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Budget</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification-container"></div>
+
+    <!-- Load Chart.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
+    <!-- Load Main JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+    // Define API endpoints
+    const API_ENDPOINTS = {
+        categories: '/api/categories',
+        budget: '/api/budget'
+    };
+    
+    // Initialize state object if it doesn't exist
+    if (typeof state === 'undefined') {
+        window.state = {
+            selectedMonth: new Date().getMonth() + 1,
+            selectedYear: new Date().getFullYear(),
+            budget: [],
+            budgetTotals: { total_budget: 0, total_spent: 0 },
+            categories: {
+                income: [],
+                expense: [],
+                transfer: []
+            },
+            modalCallbacks: {}
+        };
+    }
+    
+    // Format currency based on user preferences
+    function formatCurrency(amount, currency = 'INR') {
+        return new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: currency
+        }).format(amount);
+    }
+
+    // Define fetchAPI function
+    async function fetchAPI(url, method = 'GET', data = null) {
+        const options = {
+            method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'same-origin' // Include cookies for session management
+        };
+
+        if (data) {
+            options.body = JSON.stringify(data);
+        }
+
+        try {
+            console.log(`API Request: ${method} ${url}`, data);
+            
+            const response = await fetch(url, options);
+            let result;
+            
+            try {
+                result = await response.json();
+            } catch (e) {
+                console.error('Failed to parse JSON response:', e);
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
+                return { success: true, status: response.status };
+            }
+
+            if (!response.ok) {
+                console.error(`API Error: ${response.status} ${response.statusText}`, result);
+                throw new Error(result.message || `API request failed with status ${response.status}`);
+            }
+
+            console.log(`API Response:`, result);
+            return result;
+        } catch (error) {
+            console.error('API Error:', error);
+            showNotification(error.message || 'Something went wrong', 'error');
+            throw error;
+        }
+    }
+    
+    // Show notifications
+    function showNotification(message, type = 'info') {
+        const notificationContainer = document.getElementById('notification-container');
+        
+        if (!notificationContainer) {
+            console.error('Notification container not found');
+            return;
+        }
+        
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        
+        let icon = 'info-circle';
+        if (type === 'success') icon = 'check-circle';
+        if (type === 'error') icon = 'exclamation-circle';
+        if (type === 'warning') icon = 'exclamation-triangle';
+        
+        notification.innerHTML = `
+            <div class="notification-content">
+                <i class="fas fa-${icon} notification-icon"></i>
+                <span>${message}</span>
+            </div>
+            <button class="notification-close"><i class="fas fa-times"></i></button>
+        `;
+        
+        notificationContainer.appendChild(notification);
+        
+        // Show animation
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+        
+        // Auto hide after 5 seconds
+        const hideTimeout = setTimeout(() => {
+            hideNotification(notification);
+        }, 5000);
+        
+        // Close button functionality
+        const closeBtn = notification.querySelector('.notification-close');
+        closeBtn.addEventListener('click', () => {
+            clearTimeout(hideTimeout);
+            hideNotification(notification);
+        });
+
+        return notification;
+    }
+
+    // Hide notification
+    function hideNotification(notification) {
+        if (!notification) return;
+        
+        notification.classList.add('hide');
+        notification.classList.remove('show');
+        
+        // Remove from DOM after animation completes
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }
+    
+    // Load categories function
+    async function loadCategories() {
+        try {
+            const response = await fetchAPI(API_ENDPOINTS.categories);
+            
+            // Group categories by type
+            state.categories.income = response.categories.filter(cat => cat.type === 'INCOME');
+            state.categories.expense = response.categories.filter(cat => cat.type === 'EXPENSE');
+            state.categories.transfer = response.categories.filter(cat => cat.type === 'TRANSFER');
+            
+            // Update category select options in budget forms
+            const categorySelects = document.querySelectorAll('.category-select');
+            if (categorySelects) {
+                categorySelects.forEach(select => {
+                    renderCategoryOptions(select);
+                });
+            }
+            
+            return response.categories;
+        } catch (error) {
+            console.error('Failed to load categories:', error);
+            return [];
+        }
+    }
+    
+    // Render category options
+    function renderCategoryOptions(selectElement) {
+        // Clear existing options except the first one (if it's a placeholder)
+        const firstOption = selectElement.querySelector('option:first-child');
+        selectElement.innerHTML = '';
+        
+        if (firstOption && firstOption.value === '') {
+            selectElement.appendChild(firstOption);
+        }
+        
+        // We'll primarily use expense categories for budget
+        const categories = state.categories.expense;
+        
+        // Add each category as an option
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.id;
+            option.textContent = category.name;
+            selectElement.appendChild(option);
+        });
+    }
+    
+    // Load budget data
+    async function loadBudget() {
+        try {
+            const month = state.selectedMonth;
+            const year = state.selectedYear;
+            
+            const response = await fetchAPI(`${API_ENDPOINTS.budget}?month=${month}&year=${year}`);
+            state.budget = response.budget_items || [];
+            state.budgetTotals = response.totals || { total_budget: 0, total_spent: 0 };
+            
+            // Update UI with budget
+            updateBudgetUI();
+            
+            return state.budget;
+        } catch (error) {
+            console.error('Failed to load budget:', error);
+            return [];
+        }
+    }
+    
+    // Update budget UI
+    function updateBudgetUI() {
+        // Update budget overview
+        const totalBudgetElement = document.querySelector('.budget-stat-value:nth-child(1)');
+        const totalSpentElement = document.querySelector('.budget-stat-value:nth-child(2)');
+        const remainingElement = document.querySelector('.budget-stat-value:nth-child(3)');
+        
+        if (totalBudgetElement && totalSpentElement && remainingElement) {
+            const totalBudget = parseFloat(state.budgetTotals.total_budget) || 0;
+            const totalSpent = parseFloat(state.budgetTotals.total_spent) || 0;
+            const remaining = totalBudget - totalSpent;
+            
+            totalBudgetElement.textContent = formatCurrency(totalBudget);
+            totalSpentElement.textContent = formatCurrency(totalSpent);
+            remainingElement.textContent = formatCurrency(remaining);
+        }
+        
+        // Update budget list
+        const budgetListElement = document.querySelector('.budget-list');
+        if (budgetListElement) {
+            renderBudgetItems(budgetListElement);
+        }
+    }
+    
+    // Render budget items
+    function renderBudgetItems(container) {
+        container.innerHTML = '';
+        
+        if (!state.budget || state.budget.length === 0) {
+            container.innerHTML = `
+                <div class="no-data">
+                    <i class="fas fa-chart-pie"></i>
+                    <p>No budget items for this month</p>
+                    <button class="btn btn-primary" onclick="openModal('add-budget-modal')">Create Budget</button>
+                </div>
+            `;
+            return;
+        }
+        
+        state.budget.forEach(item => {
+            const budgetElement = document.createElement('div');
+            budgetElement.className = 'budget-item';
+            
+            // Calculate percentage and status
+            const spent = parseFloat(item.actual_amount) || 0;
+            const budget = parseFloat(item.budget_amount) || 0;
+            const percentage = budget > 0 ? (spent / budget) * 100 : 0;
+            const remaining = budget - spent;
+            
+            // Determine status class based on percentage
+            let statusClass = 'good';
+            let barClass = '';
+            
+            if (percentage >= 90) {
+                statusClass = 'danger';
+                barClass = 'danger';
+            } else if (percentage >= 75) {
+                statusClass = 'warning';
+                barClass = 'warning';
+            }
+            
+            budgetElement.innerHTML = `
+                <div class="budget-item-header">
+                    <div class="budget-item-category">
+                        <i class="fas ${item.icon || 'fa-tag'}" style="color: ${item.color || '#6B7280'}"></i>
+                        ${item.category_name}
+                    </div>
+                    <div class="budget-item-amount">${formatCurrency(budget)}</div>
+                </div>
+                <div class="budget-item-progress">
+                    <div class="budget-item-bar ${barClass}" style="width: ${Math.min(percentage, 100)}%"></div>
+                </div>
+                <div class="budget-item-status">
+                    <div class="budget-item-spent">Spent: ${formatCurrency(spent)}</div>
+                    <div class="budget-item-left ${statusClass}">
+                        ${remaining >= 0 ? `${formatCurrency(remaining)} left` : `${formatCurrency(Math.abs(remaining))} over`}
+                    </div>
+                </div>
+                <div class="budget-item-actions">
+                    <button class="budget-item-btn" onclick="editBudget(${item.category_id})">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+            `;
+            
+            container.appendChild(budgetElement);
+        });
+    }
+    
+    // Setup month selector
+    function setupMonthSelector() {
+        const monthSelect = document.getElementById('budget-month-select');
+        
+        if (!monthSelect) return;
+        
+        // Get current month and year
+        const today = new Date();
+        const currentMonth = today.getMonth() + 1;
+        const currentYear = today.getFullYear();
+        
+        // Populate dropdown with options for current year and previous year
+        const months = [
+            {value: 1, label: 'January'},
+            {value: 2, label: 'February'},
+            {value: 3, label: 'March'},
+            {value: 4, label: 'April'},
+            {value: 5, label: 'May'},
+            {value: 6, label: 'June'},
+            {value: 7, label: 'July'},
+            {value: 8, label: 'August'},
+            {value: 9, label: 'September'},
+            {value: 10, label: 'October'},
+            {value: 11, label: 'November'},
+            {value: 12, label: 'December'}
+        ];
+        
+        // Clear existing options
+        monthSelect.innerHTML = '';
+        
+        // Add current year months
+        months.forEach(month => {
+            const option = document.createElement('option');
+            option.value = `${month.value}-${currentYear}`;
+            option.textContent = `${month.label} ${currentYear}`;
+            monthSelect.appendChild(option);
+        });
+        
+        // Add previous year months
+        months.forEach(month => {
+            const option = document.createElement('option');
+            option.value = `${month.value}-${currentYear - 1}`;
+            option.textContent = `${month.label} ${currentYear - 1}`;
+            monthSelect.appendChild(option);
+        });
+        
+        // Set default to current month
+        monthSelect.value = `${currentMonth}-${currentYear}`;
+        
+        // Setup change event
+        monthSelect.addEventListener('change', function() {
+            const [month, year] = this.value.split('-').map(Number);
+            state.selectedMonth = month;
+            state.selectedYear = year;
+            loadBudget();
+        });
+        
+        // Set initial state values
+        state.selectedMonth = currentMonth;
+        state.selectedYear = currentYear;
+        
+        // Update the budget forms with current month and year
+        const budgetMonthElement = document.getElementById('budget-month');
+        const budgetYearElement = document.getElementById('budget-year');
+        const editBudgetMonthElement = document.getElementById('edit-budget-month');
+        const editBudgetYearElement = document.getElementById('edit-budget-year');
+        
+        if (budgetMonthElement) budgetMonthElement.value = currentMonth;
+        if (budgetYearElement) budgetYearElement.value = currentYear;
+        if (editBudgetMonthElement) editBudgetMonthElement.value = currentMonth;
+        if (editBudgetYearElement) editBudgetYearElement.value = currentYear;
+    }
+    
+    // Setup budget forms
+    function setupBudgetForms() {
+        const addBudgetForm = document.getElementById('add-budget-form');
+        const editBudgetForm = document.getElementById('edit-budget-form');
+        
+        if (addBudgetForm) {
+            addBudgetForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = {
+                    category_id: document.getElementById('budget-category').value,
+                    amount: parseFloat(document.getElementById('budget-amount').value),
+                    month: parseInt(document.getElementById('budget-month').value),
+                    year: parseInt(document.getElementById('budget-year').value)
+                };
+                
+                try {
+                    await fetchAPI(API_ENDPOINTS.budget, 'POST', formData);
+                    showNotification('Budget added successfully', 'success');
+                    closeModal('add-budget-modal');
+                    addBudgetForm.reset();
+                    
+                    // Reset to current month/year
+                    document.getElementById('budget-month').value = state.selectedMonth;
+                    document.getElementById('budget-year').value = state.selectedYear;
+                    
+                    await loadBudget();
+                } catch (error) {
+                    console.error('Failed to add budget:', error);
+                    showNotification('Failed to add budget: ' + error.message, 'error');
+                }
+            });
+        }
+        
+        if (editBudgetForm) {
+            editBudgetForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = {
+                    category_id: document.getElementById('edit-budget-category').value,
+                    amount: parseFloat(document.getElementById('edit-budget-amount').value),
+                    month: parseInt(document.getElementById('edit-budget-month').value),
+                    year: parseInt(document.getElementById('edit-budget-year').value)
+                };
+                
+                try {
+                    await fetchAPI(API_ENDPOINTS.budget, 'POST', formData);  // Use POST since we're using an upsert pattern
+                    showNotification('Budget updated successfully', 'success');
+                    closeModal('edit-budget-modal');
+                    
+                    // Update state.selectedMonth and state.selectedYear if they changed
+                    state.selectedMonth = formData.month;
+                    state.selectedYear = formData.year;
+                    
+                    await loadBudget();
+                } catch (error) {
+                    console.error('Failed to update budget:', error);
+                    showNotification('Failed to update budget: ' + error.message, 'error');
+                }
+            });
+        }
+        
+        // Add editBudget function to window
+        window.editBudget = function(categoryId) {
+            // Find the budget item for this category
+            const budgetItem = state.budget.find(item => item.category_id === categoryId);
+            
+            if (budgetItem) {
+                // Set form values
+                document.getElementById('edit-budget-category').value = budgetItem.category_id;
+                document.getElementById('edit-budget-amount').value = budgetItem.budget_amount;
+                document.getElementById('edit-budget-month').value = state.selectedMonth;
+                document.getElementById('edit-budget-year').value = state.selectedYear;
+                
+                // Store budget category ID in form data attribute
+                document.getElementById('edit-budget-form').dataset.budgetCategory = categoryId;
+                
+                // Open modal
+                openModal('edit-budget-modal');
+            }
+        };
+    }
+    
+    // Setup refresh button
+    function setupRefreshButton() {
+        const refreshBtn = document.getElementById('refresh-btn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', function() {
+                loadBudget();
+                showNotification('Budget data refreshed successfully', 'success');
+            });
+        }
+    }
+    
+    // Modal functions
+    window.openModal = function(modalId, data = null) {
+        const modal = document.getElementById(modalId);
+        
+        if (modal) {
+            modal.classList.add('show');
+            
+            // If modal has a callback registered, execute it
+            if (state.modalCallbacks[modalId]) {
+                state.modalCallbacks[modalId](data);
+            }
+        }
+    };
+    
+    window.closeModal = function(modalId) {
+        const modal = document.getElementById(modalId);
+        
+        if (modal) {
+            modal.classList.remove('show');
+        }
+    };
+    
+    // Make functions available globally
+    window.fetchAPI = fetchAPI;
+    window.loadCategories = loadCategories;
+    window.renderCategoryOptions = renderCategoryOptions;
+    window.loadBudget = loadBudget;
+    window.setupBudgetForms = setupBudgetForms;
+    window.formatCurrency = formatCurrency;
+    window.showNotification = showNotification;
+    
+    // Initialize page
+    setupMonthSelector();
+    loadCategories();
+    setupBudgetForms();
+    loadBudget();
+    setupRefreshButton();
+});
+    </script>
+</body>
+</html>

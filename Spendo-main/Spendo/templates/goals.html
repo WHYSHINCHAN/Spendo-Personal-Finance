@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goals - Spendo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .goals-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .goals-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .goals-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .goals-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-card {
+            background-color: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .summary-title {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        
+        .summary-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+        
+        .summary-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-tertiary);
+            margin-top: 5px;
+        }
+        
+        .goals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+        
+        .goal-card {
+            background-color: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .goal-card.completed {
+            border: 2px solid var(--success-color);
+        }
+        
+        .goal-card.completed::before {
+            content: "Completed";
+            position: absolute;
+            top: 15px;
+            right: -35px;
+            background-color: var(--success-color);
+            color: white;
+            padding: 5px 40px;
+            transform: rotate(45deg);
+            font-size: 0.8rem;
+            font-weight: 700;
+            z-index: 1;
+        }
+        
+        .goal-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+        
+        .goal-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .goal-description {
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            flex-grow: 1;
+        }
+        
+        .goal-target {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .goal-target-amount {
+            font-weight: 700;
+        }
+        
+        .goal-progress {
+            height: 10px;
+            background-color: var(--bg-tertiary);
+            border-radius: 5px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        
+        .goal-progress-bar {
+            height: 100%;
+            background-color: var(--primary-color);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+        
+        .goal-status {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .goal-current {
+            font-weight: 600;
+        }
+        
+        .goal-percentage {
+            color: var(--text-secondary);
+        }
+        
+        .goal-date {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .goal-date i {
+            margin-right: 8px;
+        }
+        
+        .goal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .goal-action-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .goal-action-btn.primary {
+            background-color: var(--primary-color);
+            color: var(--text-on-accent);
+        }
+        
+        .goal-action-btn.primary:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .goal-action-btn.secondary {
+            background-color: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+        
+        .goal-action-btn.secondary:hover {
+            background-color: var(--bg-accent);
+            color: var(--text-primary);
+        }
+        
+        .add-goal-card {
+            background-color: var(--bg-tertiary);
+            border: 2px dashed var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            height: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .add-goal-card:hover {
+            border-color: var(--primary-color);
+            background-color: var(--primary-light);
+        }
+        
+        .add-goal-card i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        .add-goal-card p {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .goal-details-modal .modal-container {
+            max-width: 700px;
+        }
+        
+        .goal-details-content {
+            padding: 20px;
+        }
+        
+        .goal-detail-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .goal-detail-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-right: 15px;
+        }
+        
+        .goal-detail-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .goal-detail-section {
+            margin-bottom: 30px;
+        }
+        
+        .goal-detail-section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+        
+        .goal-detail-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .goal-stat-card {
+            background-color: var(--bg-tertiary);
+            border-radius: var(--border-radius);
+            padding: 15px;
+        }
+        
+        .goal-stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+        
+        .goal-stat-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+        
+        .contribution-list {
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+        
+        .contribution-list-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            padding: 10px 15px;
+            background-color: var(--bg-tertiary);
+            font-weight: 600;
+        }
+        
+        .contribution-list-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+        }
+        
+        .contribution-list-item:last-child {
+            border-bottom: none;
+        }
+        
+        .contribution-date {
+            font-weight: 600;
+        }
+        
+        .contribution-amount {
+            color: var(--success-color);
+            font-weight: 700;
+        }
+        
+        .contribution-note {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .contribution-account {
+            padding: 3px 8px;
+            border-radius: 4px;
+            background-color: var(--bg-tertiary);
+            font-size: 0.8rem;
+            display: inline-block;
+        }
+        
+        .no-contributions {
+            padding: 20px;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        
+        @media (max-width: 576px) {
+            .contribution-list-header,
+            .contribution-list-item {
+                grid-template-columns: 1fr 1fr;
+                row-gap: 5px;
+            }
+            
+            .contribution-list-header div:nth-child(3),
+            .contribution-list-item div:nth-child(3) {
+                grid-column: 1;
+                grid-row: 2;
+            }
+            
+            .contribution-list-header div:nth-child(4),
+            .contribution-list-item div:nth-child(4) {
+                grid-column: 2;
+                grid-row: 2;
+                text-align: right;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-wallet"></i></div>
+                <h1>Spendo</h1>
+            </div>
+            <div class="nav-menu">
+                <a href="/dashboard" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/accounts" class="nav-link">
+                    <i class="fas fa-landmark"></i>
+                    <span>Accounts</span>
+                </a>
+                <a href="/transactions" class="nav-link">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Transactions</span>
+                </a>
+                <a href="/budget" class="nav-link">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Budget</span>
+                </a>
+                <a href="/goals" class="nav-link active">
+                    <i class="fas fa-bullseye"></i>
+                    <span>Goals</span>
+                </a>
+                <a href="/bills" class="nav-link">
+                    <i class="fas fa-file-invoice"></i>
+                    <span>Bills</span>
+                </a>
+                <a href="/education" class="nav-link">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Education</span>
+                </a>
+                <a href="/settings" class="nav-link">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </div>
+            <div class="account-section">
+                <div class="account-info">
+                    <div class="account-avatar">JD</div>
+                    <div class="account-details">
+                        <h4 id="user-name">John Doe</h4>
+                        <div class="account-actions">
+                            <button id="logout-btn" title="Logout">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-left">
+                    <button id="menu-toggle" title="Toggle Menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="greeting">
+                        <h2>Saving Goals</h2>
+                        <p>Set and track financial goals</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button id="theme-toggle" title="Toggle Theme">
+                        <i class="fas fa-moon"></i>
+                        <i class="fas fa-sun" style="display: none;"></i>
+                    </button>
+                    <button id="refresh-btn" class="action-btn" title="Refresh Data">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Refresh</span>
+                    </button>
+                    <button class="action-btn primary" id="add-goal-btn" onclick="openModal('add-goal-modal')">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Goal</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Goals Content -->
+            <div class="goals-container">
+                <!-- Goals Summary -->
+                <div class="goals-summary">
+                    <div class="summary-card">
+                        <div class="summary-title">Total Goals Value</div>
+                        <div class="summary-value" id="total-goals-value">₹0.00</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-title">Total Saved</div>
+                        <div class="summary-value" id="total-saved">₹0.00</div>
+                        <div class="summary-subtitle" id="saved-percentage">0% of total</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-title">Active Goals</div>
+                        <div class="summary-value" id="active-goals-count">0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-title">Completed Goals</div>
+                        <div class="summary-value" id="completed-goals-count">0</div>
+                    </div>
+                </div>
+
+                <!-- Goals Grid -->
+                <div class="goals-grid" id="goals-grid">
+                    <!-- Goals will be populated by JavaScript -->
+                    <div class="add-goal-card" onclick="openModal('add-goal-modal')">
+                        <i class="fas fa-plus-circle"></i>
+                        <p>Add New Goal</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add Goal Modal -->
+    <div id="add-goal-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Add New Goal</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-goal-form">
+                    <div class="form-group">
+                        <label for="goal-name">Goal Name</label>
+                        <input type="text" id="goal-name" name="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="goal-description">Description (Optional)</label>
+                        <textarea id="goal-description" name="description" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="goal-target-amount">Target Amount</label>
+                        <input type="number" id="goal-target-amount" name="target_amount" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="goal-current-amount">Current Amount (Optional)</label>
+                        <input type="number" id="goal-current-amount" name="current_amount" class="form-control" step="0.01" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="goal-target-date">Target Date (Optional)</label>
+                        <input type="date" id="goal-target-date" name="target_date" class="form-control">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Goal</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Goal Modal -->
+    <div id="edit-goal-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Edit Goal</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-goal-form">
+                    <div class="form-group">
+                        <label for="edit-goal-name">Goal Name</label>
+                        <input type="text" id="edit-goal-name" name="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-goal-description">Description (Optional)</label>
+                        <textarea id="edit-goal-description" name="description" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-goal-target-amount">Target Amount</label>
+                        <input type="number" id="edit-goal-target-amount" name="target_amount" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-goal-current-amount">Current Amount</label>
+                        <input type="number" id="edit-goal-current-amount" name="current_amount" class="form-control" step="0.01" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-goal-target-date">Target Date (Optional)</label>
+                        <input type="date" id="edit-goal-target-date" name="target_date" class="form-control">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contribute to Goal Modal -->
+    <div id="contribute-goal-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Add Contribution to Goal</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="contribute-goal-form">
+                    <div class="form-group">
+                        <label for="contribution-amount">Contribution Amount</label>
+                        <input type="number" id="contribution-amount" name="amount" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contribution-date">Contribution Date</label>
+                        <input type="date" id="contribution-date" name="contribution_date" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contribution-account">From Account (Optional)</label>
+                        <select id="contribution-account" name="account_id" class="form-control account-select">
+                            <option value="">-- Select Account --</option>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="contribution-notes">Notes</label>
+                        <textarea id="contribution-notes" name="notes" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Contribution</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Goal Details Modal -->
+    <div id="goal-details-modal" class="modal goal-details-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Goal Details</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="goal-details-content" id="goal-details-content">
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification-container"></div>
+
+    <!-- Load Main JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initial load
+            loadAccounts();
+            loadGoals();
+            setupGoalForms();
+            setupRefreshButton();
+            
+            // Setup refresh button
+            function setupRefreshButton() {
+                const refreshBtn = document.getElementById('refresh-btn');
+                if (refreshBtn) {
+                    refreshBtn.addEventListener('click', function() {
+                        loadGoals();
+                        showNotification('Goals data refreshed successfully', 'success');
+                    });
+                }
+            }
+            
+            // Update goals summary
+            function updateGoalsSummary(goals) {
+                if (!goals || goals.length === 0) {
+                    document.getElementById('total-goals-value').textContent = formatCurrency(0);
+                    document.getElementById('total-saved').textContent = formatCurrency(0);
+                    document.getElementById('saved-percentage').textContent = "0% of total";
+                    document.getElementById('active-goals-count').textContent = "0";
+                    document.getElementById('completed-goals-count').textContent = "0";
+                    return;
+                }
+                
+                let totalGoalsValue = 0;
+                let totalSaved = 0;
+                let activeGoals = 0;
+                let completedGoals = 0;
+                
+                goals.forEach(goal => {
+                    totalGoalsValue += parseFloat(goal.target_amount);
+                    totalSaved += parseFloat(goal.current_amount);
+                    
+                    if (goal.is_completed) {
+                        completedGoals++;
+                    } else {
+                        activeGoals++;
+                    }
+                });
+                
+                const savedPercentage = totalGoalsValue > 0 ? (totalSaved / totalGoalsValue) * 100 : 0;
+                
+                document.getElementById('total-goals-value').textContent = formatCurrency(totalGoalsValue);
+                document.getElementById('total-saved').textContent = formatCurrency(totalSaved);
+                document.getElementById('saved-percentage').textContent = `${savedPercentage.toFixed(1)}% of total`;
+                document.getElementById('active-goals-count').textContent = activeGoals;
+                document.getElementById('completed-goals-count').textContent = completedGoals;
+            }
+            
+            // Render goals grid
+            function renderGoalsGrid(goals) {
+                const goalsGrid = document.getElementById('goals-grid');
+                
+                if (!goalsGrid) return;
+                
+                // Clear grid except for the add goal card
+                const addGoalCard = goalsGrid.querySelector('.add-goal-card');
+                goalsGrid.innerHTML = '';
+                
+                if (!goals || goals.length === 0) {
+                    goalsGrid.appendChild(addGoalCard);
+                    return;
+                }
+                
+                // Sort goals: completed goals at the end
+                const sortedGoals = [...goals].sort((a, b) => {
+                    if (a.is_completed && !b.is_completed) return 1;
+                    if (!a.is_completed && b.is_completed) return -1;
+                    
+                    // For non-completed goals, sort by progress percentage (descending)
+                    if (!a.is_completed && !b.is_completed) {
+                        const aProgress = a.target_amount > 0 ? (a.current_amount / a.target_amount) : 0;
+                        const bProgress = b.target_amount > 0 ? (b.current_amount / b.target_amount) : 0;
+                        return bProgress - aProgress;
+                    }
+                    
+                    return 0;
+                });
+                
+                sortedGoals.forEach(goal => {
+                    const goalCard = document.createElement('div');
+                    goalCard.className = goal.is_completed ? 'goal-card completed' : 'goal-card';
+                    
+                    const progressPercentage = goal.target_amount > 0 
+                        ? Math.min(100, (goal.current_amount / goal.target_amount) * 100) 
+                        : 0;
+                        
+                    // Format the date if available
+                    let dateDisplay = '';
+                    if (goal.target_date) {
+                        const targetDate = new Date(goal.target_date);
+                        const formattedDate = targetDate.toLocaleDateString('en-US', {
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric'
+                        });
+                        
+                        // Calculate days remaining
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        const daysRemaining = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
+                        
+                        if (daysRemaining > 0) {
+                            dateDisplay = `<div class="goal-date">
+                                <i class="fas fa-calendar-alt"></i>
+                                ${formattedDate} (${daysRemaining} days left)
+                            </div>`;
+                        } else if (daysRemaining === 0) {
+                            dateDisplay = `<div class="goal-date">
+                                <i class="fas fa-calendar-alt"></i>
+                                ${formattedDate} (Due today)
+                            </div>`;
+                        } else {
+                            dateDisplay = `<div class="goal-date">
+                                <i class="fas fa-calendar-alt"></i>
+                                ${formattedDate} (Passed by ${Math.abs(daysRemaining)} days)
+                            </div>`;
+                        }
+                    }
+                    
+                    goalCard.innerHTML = `
+                        <div class="goal-icon" style="color: ${goal.color || 'var(--primary-color)'}">
+                            <i class="fas ${goal.icon || 'fa-bullseye'}"></i>
+                        </div>
+                        <div class="goal-name">${goal.name}</div>
+                        <div class="goal-description">${goal.description || ''}</div>
+                        <div class="goal-target">
+                            <span>Target:</span>
+                            <span class="goal-target-amount">${formatCurrency(goal.target_amount)}</span>
+                        </div>
+                        <div class="goal-progress">
+                            <div class="goal-progress-bar" style="width: ${progressPercentage}%"></div>
+                        </div>
+                        <div class="goal-status">
+                            <div class="goal-current">${formatCurrency(goal.current_amount)}</div>
+                            <div class="goal-percentage">${progressPercentage.toFixed(0)}%</div>
+                        </div>
+                        ${dateDisplay}
+                        <div class="goal-actions">
+                            <div class="goal-action-btn primary" onclick="openContributeModal(${goal.id})">Contribute</div>
+                            <div class="goal-action-btn secondary" onclick="viewGoalDetails(${goal.id})">Details</div>
+                        </div>
+                    `;
+                    
+                    goalsGrid.appendChild(goalCard);
+                });
+                
+                // Add the "Add Goal" card
+                goalsGrid.appendChild(addGoalCard);
+            }
+            
+            // Add global functions for goal interaction
+            window.openContributeModal = function(goalId) {
+                // Find goal
+                const goal = state.goals.find(g => g.id === goalId);
+                
+                if (goal) {
+                    // Reset form
+                    document.getElementById('contribute-goal-form').reset();
+                    
+                    // Set today's date
+                    document.getElementById('contribution-date').value = new Date().toISOString().slice(0, 10);
+                    
+                    // Update modal title
+                    const modalTitle = document.querySelector('#contribute-goal-modal .modal-header h3');
+                    if (modalTitle) {
+                        modalTitle.textContent = `Contribute to ${goal.name}`;
+                    }
+                    
+                    // Store goal ID in form data attribute
+                    document.getElementById('contribute-goal-form').dataset.goalId = goalId;
+                    
+                    // Open modal
+                    openModal('contribute-goal-modal');
+                }
+            };
+            
+            window.viewGoalDetails = async function(goalId) {
+                // Find goal
+                const goal = state.goals.find(g => g.id === goalId);
+                
+                if (!goal) return;
+                
+                // Fetch goal details including contributions
+                try {
+                    const response = await fetchAPI(`${API_ENDPOINTS.goals}/${goalId}`);
+                    const goalDetails = response.goal;
+                    
+                    // Populate modal content
+                    const detailsContent = document.getElementById('goal-details-content');
+                    
+                    if (detailsContent) {
+                        // Calculate progress percentage
+                        const progressPercentage = goalDetails.target_amount > 0 
+                            ? Math.min(100, (goalDetails.current_amount / goalDetails.target_amount) * 100) 
+                            : 0;
+                            
+                        // Format target date
+                        let targetDateFormatted = 'No target date set';
+                        if (goalDetails.target_date) {
+                            const targetDate = new Date(goalDetails.target_date);
+                            targetDateFormatted = targetDate.toLocaleDateString('en-US', {
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric'
+                            });
+                        }
+                        
+                        // Calculate average monthly contribution if goal has a target date
+                        let monthlyContributionNeeded = 'N/A';
+                        if (goalDetails.target_date) {
+                            const today = new Date();
+                            const targetDate = new Date(goalDetails.target_date);
+                            const monthsLeft = (targetDate.getFullYear() - today.getFullYear()) * 12 + 
+                                                targetDate.getMonth() - today.getMonth();
+                            
+                            if (monthsLeft > 0) {
+                                const amountLeft = goalDetails.target_amount - goalDetails.current_amount;
+                                if (amountLeft > 0) {
+                                    monthlyContributionNeeded = formatCurrency(amountLeft / monthsLeft);
+                                } else {
+                                    monthlyContributionNeeded = formatCurrency(0);
+                                }
+                            }
+                        }
+                        
+                        // Build list of contributions
+                        let contributionsHTML = '';
+                        if (goalDetails.contributions && goalDetails.contributions.length > 0) {
+                            contributionsHTML = `
+                                <div class="contribution-list">
+                                    <div class="contribution-list-header">
+                                        <div>Date</div>
+                                        <div>Amount</div>
+                                        <div>Notes</div>
+                                        <div>Account</div>
+                                    </div>
+                            `;
+                            
+                            goalDetails.contributions.forEach(contribution => {
+                                const date = new Date(contribution.contribution_date).toLocaleDateString('en-US', {
+                                    year: 'numeric', 
+                                    month: 'short', 
+                                    day: 'numeric'
+                                });
+                                
+                                contributionsHTML += `
+                                    <div class="contribution-list-item">
+                                        <div class="contribution-date">${date}</div>
+                                        <div class="contribution-amount">${formatCurrency(contribution.amount)}</div>
+                                        <div class="contribution-note">${contribution.notes || '-'}</div>
+                                        <div>${contribution.account_name ? 
+                                            `<span class="contribution-account">${contribution.account_name}</span>` : 
+                                            '-'}</div>
+                                    </div>
+                                `;
+                            });
+                            
+                            contributionsHTML += `</div>`;
+                        } else {
+                            contributionsHTML = `
+                                <div class="no-contributions">
+                                    <p>No contributions have been made to this goal yet.</p>
+                                </div>
+                            `;
+                        }
+                        
+                        // Build the complete HTML
+                        detailsContent.innerHTML = `
+                            <div class="goal-detail-header">
+                                <div class="goal-detail-icon">
+                                    <i class="fas ${goalDetails.icon || 'fa-bullseye'}"></i>
+                                </div>
+                                <div>
+                                    <div class="goal-detail-title">${goalDetails.name}</div>
+                                    <div>${goalDetails.description || ''}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="goal-detail-section">
+                                <div class="goal-detail-stats">
+                                    <div class="goal-stat-card">
+                                        <div class="goal-stat-label">Target Amount</div>
+                                        <div class="goal-stat-value">${formatCurrency(goalDetails.target_amount)}</div>
+                                    </div>
+                                    <div class="goal-stat-card">
+                                        <div class="goal-stat-label">Current Amount</div>
+                                        <div class="goal-stat-value">${formatCurrency(goalDetails.current_amount)}</div>
+                                    </div>
+                                    <div class="goal-stat-card">
+                                        <div class="goal-stat-label">Progress</div>
+                                        <div class="goal-stat-value">${progressPercentage.toFixed(0)}%</div>
+                                    </div>
+                                    <div class="goal-stat-card">
+                                        <div class="goal-stat-label">Target Date</div>
+                                        <div class="goal-stat-value">${targetDateFormatted}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="goal-progress">
+                                    <div class="goal-progress-bar" style="width: ${progressPercentage}%"></div>
+                                </div>
+                                
+                                <div class="goal-detail-stats">
+                                    <div class="goal-stat-card">
+                                        <div class="goal-stat-label">Amount Remaining</div>
+                                        <div class="goal-stat-value">${formatCurrency(Math.max(0, goalDetails.target_amount - goalDetails.current_amount))}</div>
+                                    </div>
+                                    <div class="goal-stat-card">
+                                        <div class="goal-stat-label">Monthly Needed</div>
+                                        <div class="goal-stat-value">${monthlyContributionNeeded}</div>
+                                    </div>
+                                    <div class="goal-stat-card">
+                                        <div class="goal-stat-label">Status</div>
+                                        <div class="goal-stat-value">${goalDetails.is_completed ? 'Completed' : 'In Progress'}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="goal-detail-section">
+                                <div class="goal-detail-section-title">Contribution History</div>
+                                ${contributionsHTML}
+                            </div>
+                            
+                            <div class="goal-actions">
+                                <div class="goal-action-btn primary" onclick="openContributeModal(${goalDetails.id})">Add Contribution</div>
+                                <div class="goal-action-btn secondary" onclick="openModal('edit-goal-modal', ${goalDetails.id})">Edit Goal</div>
+                            </div>
+                        `;
+                    }
+                    
+                    // Open modal
+                    openModal('goal-details-modal');
+                } catch (error) {
+                    console.error('Failed to load goal details:', error);
+                    showNotification('Failed to load goal details', 'error');
+                }
+            };
+        });
+    </script>
+</body>
+</html>

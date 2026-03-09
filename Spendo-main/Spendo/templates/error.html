@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - Spendo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .error-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .error-icon {
+            font-size: 5rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        
+        .error-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+        }
+        
+        .error-message {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            max-width: 600px;
+        }
+        
+        .error-actions {
+            display: flex;
+            gap: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="error-container">
+            <div class="error-icon">
+                <i class="fas {% if code == 404 %}fa-map-signs{% else %}fa-exclamation-triangle{% endif %}"></i>
+            </div>
+            <h1 class="error-title">{{ title }}</h1>
+            <p class="error-message">{{ message }}</p>
+            <div class="error-actions">
+                <a href="javascript:history.back()" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Go Back
+                </a>
+                <a href="{{ url_for('index') }}" class="btn btn-primary">
+                    <i class="fas fa-home"></i> Go Home
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check system theme preference
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        
+        // Apply theme based on preference or saved theme
+        const savedTheme = localStorage.getItem('theme');
+        const theme = savedTheme || (prefersDarkScheme.matches ? 'dark' : 'light');
+        
+        // Apply theme
+        document.documentElement.setAttribute('data-theme', theme);
+    </script>
+</body>
+</html>

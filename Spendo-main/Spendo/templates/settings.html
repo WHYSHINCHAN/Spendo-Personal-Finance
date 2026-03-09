@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Spendo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .settings-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .settings-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 30px;
+        }
+        
+        .settings-tab {
+            padding: 15px 20px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all var(--transition-speed) ease;
+        }
+        
+        .settings-tab:hover {
+            color: var(--text-primary);
+        }
+        
+        .settings-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+        
+        .settings-content {
+            display: none;
+        }
+        
+        .settings-content.active {
+            display: block;
+        }
+        
+        .settings-card {
+            background-color: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .settings-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .settings-card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+        
+        .avatar-container {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .avatar-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: var(--text-on-accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .avatar-actions {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .theme-options {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .theme-option {
+            flex: 1;
+            text-align: center;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+            transition: border-color var(--transition-speed) ease;
+        }
+        
+        .theme-option.active {
+            border-color: var(--primary-color);
+        }
+        
+        .theme-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+        
+        .preference-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .preference-item:last-child {
+            border-bottom: none;
+        }
+        
+        .preference-label {
+            font-weight: 600;
+        }
+        
+        .preference-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--bg-tertiary);
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: var(--bg-secondary);
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: var(--primary-color);
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-wallet"></i></div>
+                <h1>Spendo</h1>
+            </div>
+            <div class="nav-menu">
+                <a href="/dashboard" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/accounts" class="nav-link">
+                    <i class="fas fa-landmark"></i>
+                    <span>Accounts</span>
+                </a>
+                <a href="/transactions" class="nav-link">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Transactions</span>
+                </a>
+                <a href="/budget" class="nav-link">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Budget</span>
+                </a>
+                <a href="/goals" class="nav-link">
+                    <i class="fas fa-bullseye"></i>
+                    <span>Goals</span>
+                </a>
+                <a href="/bills" class="nav-link">
+                    <i class="fas fa-file-invoice"></i>
+                    <span>Bills</span>
+                </a>
+                <a href="/education" class="nav-link">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Education</span>
+                </a>
+                <a href="/settings" class="nav-link active">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </div>
+            <div class="account-section">
+                <div class="account-info">
+                    <div class="account-avatar">JD</div>
+                    <div class="account-details">
+                        <h4 id="user-name">John Doe</h4>
+                        <div class="account-actions">
+                            <button id="logout-btn" title="Logout">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-left">
+                    <button id="menu-toggle" title="Toggle Menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="greeting">
+                        <h2>Settings</h2>
+                        <p>Manage your profile and preferences</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button id="theme-toggle" title="Toggle Theme">
+                        <i class="fas fa-moon"></i>
+                        <i class="fas fa-sun" style="display: none;"></i>
+                    </button>
+                    <div class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notifications-badge">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Content -->
+            <div class="settings-container">
+                <div class="settings-tabs">
+                    <div class="settings-tab active" data-target="profile-settings">Profile</div>
+                    <div class="settings-tab" data-target="account-settings">Account</div>
+                    <div class="settings-tab" data-target="preferences-settings">Preferences</div>
+                </div>
+
+                <!-- Profile Settings -->
+                <div id="profile-settings" class="settings-content active">
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <h3 class="settings-card-title">Profile Information</h3>
+                        </div>
+                        <form id="profile-form">
+                            <div class="avatar-container">
+                                <div class="avatar-preview" id="avatar-preview">JD</div>
+                                <div class="avatar-actions">
+                                    <p>Your profile picture is displayed as your initials</p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="profile-full-name">Full Name</label>
+                                <input type="text" id="profile-full-name" name="full_name" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="profile-username">Username</label>
+                                <input type="text" id="profile-username" name="username" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="profile-email">Email</label>
+                                <input type="email" id="profile-email" name="email" class="form-control" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Account Settings -->
+                <div id="account-settings" class="settings-content">
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <h3 class="settings-card-title">Change Password</h3>
+                        </div>
+                        <form id="password-form">
+                            <div class="form-group">
+                                <label for="current-password">Current Password</label>
+                                <input type="password" id="current-password" name="current_password" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="new-password">New Password</label>
+                                <input type="password" id="new-password" name="new_password" class="form-control" required data-min-length="8">
+                            </div>
+                            <div class="form-group">
+                                <label for="confirm-password">Confirm New Password</label>
+                                <input type="password" id="confirm-password" name="confirm_password" class="form-control" required data-matches="new-password">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update Password</button>
+                        </form>
+                    </div>
+
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <h3 class="settings-card-title">Danger Zone</h3>
+                        </div>
+                        <p>Once you delete your account, there is no going back. Please be certain.</p>
+                        <button id="delete-account-btn" class="btn btn-danger">Delete My Account</button>
+                    </div>
+                </div>
+
+                <!-- Preferences Settings -->
+                <div id="preferences-settings" class="settings-content">
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <h3 class="settings-card-title">Theme</h3>
+                        </div>
+                        <div class="theme-options">
+                            <div class="theme-option" data-theme="light">
+                                <div class="theme-icon">
+                                    <i class="fas fa-sun"></i>
+                                </div>
+                                <div class="theme-name">Light</div>
+                            </div>
+                            <div class="theme-option" data-theme="dark">
+                                <div class="theme-icon">
+                                    <i class="fas fa-moon"></i>
+                                </div>
+                                <div class="theme-name">Dark</div>
+                            </div>
+                            <div class="theme-option" data-theme="system">
+                                <div class="theme-icon">
+                                    <i class="fas fa-desktop"></i>
+                                </div>
+                                <div class="theme-name">System</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <h3 class="settings-card-title">Currency and Format</h3>
+                        </div>
+                        <form id="format-form">
+                            <div class="form-group">
+                                <label for="currency">Currency</label>
+                                <select id="currency" name="currency" class="form-control">
+                                    <option value="INR">Indian Rupee (₹)</option>
+                                    <option value="USD">US Dollar ($)</option>
+                                    <option value="EUR">Euro (€)</option>
+                                    <option value="GBP">British Pound (£)</option>
+                                    <option value="JPY">Japanese Yen (¥)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="date-format">Date Format</label>
+                                <select id="date-format" name="date_format" class="form-control">
+                                    <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                                    <option value="DD-MM-YYYY">DD-MM-YYYY</option>
+                                    <option value="MM-DD-YYYY">MM-DD-YYYY</option>
+                                    <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                                    <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </form>
+                    </div>
+
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <h3 class="settings-card-title">Notifications</h3>
+                        </div>
+                        <div class="preference-item">
+                            <div>
+                                <div class="preference-label">Enable Notifications</div>
+                                <div class="preference-description">Show in-app notifications for bills, budget alerts, etc.</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="notification-enabled" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="preference-item">
+                            <div>
+                                <div class="preference-label">Email Notifications</div>
+                                <div class="preference-description">Receive important updates via email</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="email-notification" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Delete Account Confirmation Modal -->
+    <div id="delete-account-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Delete Account</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete your account? This action cannot be undone.</p>
+                <p>All your data including accounts, transactions, budgets, and goals will be permanently deleted.</p>
+                <div class="form-group">
+                    <label for="delete-password">Enter your password to confirm</label>
+                    <input type="password" id="delete-password" name="password" class="form-control" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                    <button type="button" id="confirm-delete-account" class="btn btn-danger">Delete My Account</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification-container"></div>
+
+    <!-- Load Main JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Settings tabs functionality
+            const settingsTabs = document.querySelectorAll('.settings-tab');
+            const settingsContents = document.querySelectorAll('.settings-content');
+            
+            settingsTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and contents
+                    settingsTabs.forEach(t => t.classList.remove('active'));
+                    settingsContents.forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    tab.classList.add('active');
+                    const targetContent = document.getElementById(tab.dataset.target);
+                    if (targetContent) {
+                        targetContent.classList.add('active');
+                    }
+                });
+            });
+            
+            // Theme options functionality
+            const themeOptions = document.querySelectorAll('.theme-option');
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            
+            // Set active theme option
+            themeOptions.forEach(option => {
+                if (option.dataset.theme === currentTheme) {
+                    option.classList.add('active');
+                }
+                
+                option.addEventListener('click', () => {
+                    // Remove active class from all options
+                    themeOptions.forEach(o => o.classList.remove('active'));
+                    
+                    // Add active class to clicked option
+                    option.classList.add('active');
+                    
+                    // Apply theme
+                    const theme = option.dataset.theme;
+                    if (theme === 'system') {
+                        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+                        const systemTheme = prefersDarkScheme.matches ? 'dark' : 'light';
+                        document.documentElement.setAttribute('data-theme', systemTheme);
+                        localStorage.removeItem('theme');
+                    } else {
+                        document.documentElement.setAttribute('data-theme', theme);
+                        localStorage.setItem('theme', theme);
+                    }
+                });
+            });
+            
+            // Delete account button
+            const deleteAccountBtn = document.getElementById('delete-account-btn');
+            if (deleteAccountBtn) {
+                deleteAccountBtn.addEventListener('click', () => {
+                    const modal = document.getElementById('delete-account-modal');
+                    if (modal) {
+                        modal.classList.add('show');
+                    }
+                });
+            }
+            
+            // Load user profile data
+            async function loadProfileData() {
+                try {
+                    const response = await fetchAPI(API_ENDPOINTS.profile);
+                    const user = response.user;
+                    
+                    // Populate form fields
+                    document.getElementById('profile-full-name').value = user.full_name;
+                    document.getElementById('profile-username').value = user.username;
+                    document.getElementById('profile-email').value = user.email;
+                    
+                    // Update avatar preview
+                    const avatarPreview = document.getElementById('avatar-preview');
+                    if (avatarPreview) {
+                        const nameParts = user.full_name.split(' ');
+                        const initials = nameParts.map(part => part.charAt(0).toUpperCase()).join('');
+                        avatarPreview.textContent = initials;
+                    }
+                    
+                    // Load preferences
+                    const preferences = response.preferences;
+                    if (preferences) {
+                        document.getElementById('currency').value = preferences.currency || 'INR';
+                        document.getElementById('date-format').value = preferences.date_format || 'YYYY-MM-DD';
+                        document.getElementById('notification-enabled').checked = preferences.notification_enabled;
+                        document.getElementById('email-notification').checked = preferences.email_notification;
+                    }
+                } catch (error) {
+                    console.error('Failed to load profile data:', error);
+                    showNotification('Failed to load profile data', 'error');
+                }
+            }
+            
+            // Load profile data on page load
+            loadProfileData();
+            
+            // Setup form submission handlers
+            setupForm('profile-form', async (formData) => {
+                try {
+                    const response = await fetchAPI(API_ENDPOINTS.profile, 'PUT', formData);
+                    showNotification('Profile updated successfully', 'success');
+                    
+                    // Update avatar and user name throughout the app
+                    const fullName = formData.full_name;
+                    document.getElementById('user-name').textContent = fullName;
+                    
+                    const nameParts = fullName.split(' ');
+                    const initials = nameParts.map(part => part.charAt(0).toUpperCase()).join('');
+                    
+                    const avatarElements = document.querySelectorAll('.account-avatar');
+                    avatarElements.forEach(el => {
+                        el.textContent = initials;
+                    });
+                    
+                    document.getElementById('avatar-preview').textContent = initials;
+                } catch (error) {
+                    console.error('Failed to update profile:', error);
+                }
+            });
+            
+            setupForm('password-form', async (formData) => {
+                try {
+                    if (formData.new_password !== formData.confirm_password) {
+                        showNotification('New passwords do not match', 'error');
+                        return;
+                    }
+                    
+                    const response = await fetchAPI(API_ENDPOINTS.profile, 'PUT', {
+                        current_password: formData.current_password,
+                        new_password: formData.new_password
+                    });
+                    
+                    showNotification('Password updated successfully', 'success');
+                    document.getElementById('password-form').reset();
+                } catch (error) {
+                    console.error('Failed to update password:', error);
+                }
+            });
+            
+            setupForm('format-form', async (formData) => {
+                try {
+                    const response = await fetchAPI(API_ENDPOINTS.preferences, 'PUT', formData);
+                    showNotification('Preferences updated successfully', 'success');
+                } catch (error) {
+                    console.error('Failed to update preferences:', error);
+                }
+            });
+            
+            // Handle notification toggles
+            const notificationToggle = document.getElementById('notification-enabled');
+            if (notificationToggle) {
+                notificationToggle.addEventListener('change', async (e) => {
+                    try {
+                        const response = await fetchAPI(API_ENDPOINTS.preferences, 'PUT', {
+                            notification_enabled: e.target.checked
+                        });
+                        showNotification('Notification preference updated', 'success');
+                    } catch (error) {
+                        console.error('Failed to update notification preference:', error);
+                        e.target.checked = !e.target.checked; // Revert on error
+                    }
+                });
+            }
+            
+            const emailNotificationToggle = document.getElementById('email-notification');
+            if (emailNotificationToggle) {
+                emailNotificationToggle.addEventListener('change', async (e) => {
+                    try {
+                        const response = await fetchAPI(API_ENDPOINTS.preferences, 'PUT', {
+                            email_notification: e.target.checked
+                        });
+                        showNotification('Email notification preference updated', 'success');
+                    } catch (error) {
+                        console.error('Failed to update email notification preference:', error);
+                        e.target.checked = !e.target.checked; // Revert on error
+                    }
+                });
+            }
+            
+            // Handle account deletion
+            const confirmDeleteBtn = document.getElementById('confirm-delete-account');
+            if (confirmDeleteBtn) {
+                confirmDeleteBtn.addEventListener('click', async () => {
+                    try {
+                        const password = document.getElementById('delete-password').value;
+                        if (!password) {
+                            showNotification('Please enter your password to confirm', 'error');
+                            return;
+                        }
+                        
+                        const response = await fetchAPI(API_ENDPOINTS.profile, 'DELETE', { password });
+                        showNotification('Account deleted successfully', 'success');
+                        
+                        // Redirect to login page after successful deletion
+                        setTimeout(() => {
+                            window.location.href = '/';
+                        }, 1500);
+                    } catch (error) {
+                        console.error('Failed to delete account:', error);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

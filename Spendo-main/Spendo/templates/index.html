@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spendo - Personal Finance Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Auth Section -->
+        <div id="auth-section" class="auth-container">
+            <div class="auth-box">
+                <div class="auth-header">
+                    <div class="logo">
+                        <div class="logo-icon"><i class="fas fa-wallet"></i></div>
+                        <h1>Spendo</h1>
+                    </div>
+                    <div class="auth-tabs">
+                        <button class="auth-tab active" data-target="login-form">Login</button>
+                        <button class="auth-tab" data-target="register-form">Register</button>
+                    </div>
+                </div>
+                <div class="auth-forms">
+                    <!-- Login Form -->
+                    <form id="login-form" class="auth-form active">
+                        <div class="form-group">
+                            <label for="login-email">Email</label>
+                            <input type="email" id="login-email" name="email" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="login-password">Password</label>
+                            <input type="password" id="login-password" name="password" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Login</button>
+                    </form>
+                    
+                    <!-- Register Form -->
+                    <form id="register-form" class="auth-form">
+                        <div class="form-group">
+                            <label for="register-full-name">Full Name</label>
+                            <input type="text" id="register-full-name" name="full_name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-username">Username</label>
+                            <input type="text" id="register-username" name="username" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-email">Email</label>
+                            <input type="email" id="register-email" name="email" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-password">Password</label>
+                            <input type="password" id="register-password" name="password" class="form-control" required data-min-length="8">
+                        </div>
+                        <div class="form-group">
+                            <label for="register-confirm-password">Confirm Password</label>
+                            <input type="password" id="register-confirm-password" name="confirm_password" class="form-control" required data-matches="register-password">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Register</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard Section - Initially Hidden -->
+        <div id="dashboard-section" class="dashboard-container" style="display: none;">
+            <!-- Content will be loaded from dashboard.html -->
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification-container"></div>
+
+    <!-- Load Main JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

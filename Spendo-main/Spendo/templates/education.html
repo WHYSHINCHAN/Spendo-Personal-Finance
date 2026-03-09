@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Education - Spendo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .education-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .education-filters {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+        }
+        
+        .filter-label {
+            margin-right: 10px;
+            font-weight: 600;
+        }
+        
+        .filter-select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-tertiary);
+        }
+        
+        .education-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .education-card {
+            background-color: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .education-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-shadow), 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .education-card-image {
+            height: 150px;
+            background-color: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+        }
+        
+        .education-card-image i {
+            font-size: 3rem;
+        }
+        
+        .education-card-content {
+            padding: 20px;
+        }
+        
+        .education-card-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .education-card-description {
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            display: -webkit-box;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .education-card-meta {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .education-card-tag {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .education-card-link {
+            display: flex;
+            align-items: center;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .education-card-link i {
+            margin-left: 5px;
+            transition: transform 0.3s ease;
+        }
+        
+        .education-card-link:hover i {
+            transform: translateX(3px);
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 50px 0;
+            grid-column: 1 / -1;
+        }
+        
+        .no-results i {
+            font-size: 3rem;
+            color: var(--text-tertiary);
+            margin-bottom: 20px;
+        }
+        
+        .no-results p {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-wallet"></i></div>
+                <h1>Spendo</h1>
+            </div>
+            <div class="nav-menu">
+                <a href="/dashboard" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/accounts" class="nav-link">
+                    <i class="fas fa-landmark"></i>
+                    <span>Accounts</span>
+                </a>
+                <a href="/transactions" class="nav-link">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Transactions</span>
+                </a>
+                <a href="/budget" class="nav-link">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Budget</span>
+                </a>
+                <a href="/goals" class="nav-link">
+                    <i class="fas fa-bullseye"></i>
+                    <span>Goals</span>
+                </a>
+                <a href="/bills" class="nav-link">
+                    <i class="fas fa-file-invoice"></i>
+                    <span>Bills</span>
+                </a>
+                <a href="/education" class="nav-link active">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Education</span>
+                </a>
+                <a href="/settings" class="nav-link">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </div>
+            <div class="account-section">
+                <div class="account-info">
+                    <div class="account-avatar">JD</div>
+                    <div class="account-details">
+                        <h4 id="user-name">John Doe</h4>
+                        <div class="account-actions">
+                            <button id="logout-btn" title="Logout">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-left">
+                    <button id="menu-toggle" title="Toggle Menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="greeting">
+                        <h2>Financial Education</h2>
+                        <p>Learn and grow your financial knowledge</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button id="theme-toggle" title="Toggle Theme">
+                        <i class="fas fa-moon"></i>
+                        <i class="fas fa-sun" style="display: none;"></i>
+                    </button>
+                    <div class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notifications-badge">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Education Content -->
+            <div class="education-container">
+                <div class="education-filters">
+                    <div class="filter-group">
+                        <label class="filter-label">Level:</label>
+                        <select id="level-filter" class="filter-select">
+                            <option value="">All Levels</option>
+                            <option value="BEGINNER">Beginner</option>
+                            <option value="INTERMEDIATE">Intermediate</option>
+                            <option value="ADVANCED">Advanced</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Type:</label>
+                        <select id="type-filter" class="filter-select">
+                            <option value="">All Types</option>
+                            <option value="ARTICLE">Articles</option>
+                            <option value="VIDEO">Videos</option>
+                            <option value="GUIDE">Guides</option>
+                            <option value="QUIZ">Quizzes</option>
+                        </select>
+                    </div>
+                    <div class="search-box">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="search-input" placeholder="Search education content...">
+                    </div>
+                </div>
+
+                <div class="education-grid" id="education-grid">
+                    <!-- Education cards will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification-container"></div>
+
+    <!-- Load Main JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load education content
+            let educationData = [];
+            
+            async function loadEducationContent() {
+                try {
+                    const content = await getEducationContent();
+                    educationData = content;
+                    renderEducationGrid(content);
+                } catch (error) {
+                    console.error('Failed to load education content:', error);
+                    showNotification('Failed to load education content', 'error');
+                }
+            }
+            
+            // Render education grid
+            function renderEducationGrid(content) {
+                const grid = document.getElementById('education-grid');
+                
+                if (!grid) return;
+                
+                grid.innerHTML = '';
+                
+                if (content.length === 0) {
+                    grid.innerHTML = `
+                        <div class="no-results">
+                            <i class="fas fa-book-reader"></i>
+                            <p>No education content found</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                content.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'education-card';
+                    
+                    let icon = 'book';
+                    let link = 'Read Article';
+                    
+                    if (item.content_type === 'VIDEO') {
+                        icon = 'play-circle';
+                        link = 'Watch Video';
+                    } else if (item.content_type === 'GUIDE') {
+                        icon = 'file-alt';
+                        link = 'View Guide';
+                    } else if (item.content_type === 'QUIZ') {
+                        icon = 'question-circle';
+                        link = 'Take Quiz';
+                    }
+                    
+                    card.innerHTML = `
+                        <div class="education-card-image">
+                            <i class="fas fa-${icon}"></i>
+                        </div>
+                        <div class="education-card-content">
+                            <h3 class="education-card-title">${item.title}</h3>
+                            <p class="education-card-description">${item.description}</p>
+                            <div class="education-card-meta">
+                                <span class="education-card-tag">${item.level}</span>
+                                <span class="education-card-tag">${item.content_type}</span>
+                            </div>
+                            <a href="${item.url}" class="education-card-link" target="_blank">
+                                ${link} <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    `;
+                    
+                    grid.appendChild(card);
+                });
+            }
+            
+            // Filter education content
+            function filterEducationContent() {
+                const levelFilter = document.getElementById('level-filter').value;
+                const typeFilter = document.getElementById('type-filter').value;
+                const searchTerm = document.getElementById('search-input').value.toLowerCase();
+                
+                const filteredContent = educationData.filter(item => {
+                    const matchesLevel = !levelFilter || item.level === levelFilter;
+                    const matchesType = !typeFilter || item.content_type === typeFilter;
+                    const matchesSearch = !searchTerm || 
+                        item.title.toLowerCase().includes(searchTerm) || 
+                        item.description.toLowerCase().includes(searchTerm) ||
+                        (item.tags && item.tags.toLowerCase().includes(searchTerm));
+                    
+                    return matchesLevel && matchesType && matchesSearch;
+                });
+                
+                renderEducationGrid(filteredContent);
+            }
+            
+            // Set up filter event listeners
+            document.getElementById('level-filter').addEventListener('change', filterEducationContent);
+            document.getElementById('type-filter').addEventListener('change', filterEducationContent);
+            
+            // Set up search input with debounce
+            const searchInput = document.getElementById('search-input');
+            let searchTimeout;
+            
+            searchInput.addEventListener('input', () => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(filterEducationContent, 300);
+            });
+            
+            // Load initial education content
+            loadEducationContent();
+        });
+    </script>
+</body>
+</html>
