@@ -168,10 +168,10 @@ For deploying the application in production:
 1️⃣ Use a Production WSGI Server
 pip install gunicorn
 gunicorn app:app
+
 2️⃣ Use a Production Database
 
 Recommended options:
-
 PostgreSQL
 
 MySQL
@@ -182,11 +182,8 @@ export DATABASE_URI="postgresql://username:password@localhost/finance_tracker"
 4️⃣ Configure Reverse Proxy
 
 Use:
-
-Nginx
-
+Ngin
 Apache
-
 Enable HTTPS for secure connections.
 
 5️⃣ Database Backups
@@ -219,23 +216,7 @@ Contributions are welcome!
 
 If you'd like to improve Spendo, feel free to fork the repository and submit a pull request.
 
-📄 License
-
-This project is licensed under the MIT License.
-
-👨‍💻 Author
-
-Developed as a personal finance tracking project focused on simplicity, speed, and privacy.
 
 
----
 
-✅ If you want, I can also give you a **much better GitHub README version** with:
 
-- badges (Python, Flask, License)
-- screenshots section
-- demo section
-- installation with virtualenv
-- cleaner project structure
-
-It will look **10× more professional for GitHub projects.**
